@@ -1,4 +1,9 @@
 export default class Config {
+	static readonly lowerBoundElo = 800;
+	static readonly upperBoundElo = 2400;
+	static readonly lowerBoundK = 40;
+	static readonly upperBoundK = 10;
+	
 	static readonly publicCommandsDir = 'commands';
 	static readonly secretCommandsDir = 'secret_commands';
 	static readonly commandDirs = [
