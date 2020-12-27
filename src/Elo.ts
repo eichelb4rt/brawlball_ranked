@@ -1,6 +1,6 @@
 import Config from "./Config";
 
-export default class Player {
+export class Player {
     public readonly k: number = 20; // K-Factor
     public elo: number;
 
@@ -9,7 +9,7 @@ export default class Player {
         if (elo < Config.lowerBoundElo) {
             this.k = Config.lowerBoundK;
         } else if (elo < Config.upperBoundElo) {  // linear function from lower bound to upper bound
-            this.k = ((elo - Config.lowerBoundElo) / (Config.upperBoundElo - Config.lowerBoundElo)) * (Config.upperBoundElo - Config.lowerBoundElo) + Config.lowerBoundElo;
+            this.k = ((elo - Config.lowerBoundElo) / (Config.upperBoundElo - Config.lowerBoundElo)) * (Config.upperBoundK - Config.lowerBoundK) + Config.lowerBoundK;
         } else {  // >= upperBoundElo
             this.k = Config.upperBoundK;
         }
@@ -49,7 +49,7 @@ export class TwoPlayerGame {
     }
 }
 
-export class Game {
+export default class Game {
     private readonly players: Player[];
     private readonly enemies: Player[];
 
