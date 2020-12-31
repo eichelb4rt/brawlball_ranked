@@ -3,8 +3,6 @@ export default class Config {
 	static readonly upperBoundElo = 3000;
 	static readonly lowerBoundK = 50;
 	static readonly upperBoundK = 10;
-
-	static readonly brawlAPI = "https://api.brawlhalla.com";
 	
 	static readonly publicCommandsDir = 'commands';
 	static readonly secretCommandsDir = 'secret_commands';
