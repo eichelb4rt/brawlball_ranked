@@ -1,4 +1,4 @@
 node_modules/
 build/
-keys.ts
+src/keys.ts
 .vscode/
