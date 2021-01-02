@@ -1,31 +1,23 @@
 import Config from "./Config";
 
 export class Player {
-    private k: number = 20; // K-Factor - is determined by elo
     private elo: number = 800;  // these values will be overwritten
 
     constructor(elo: number) {
         this.elo = elo;
-        this.updateK();
-    }
-
-    private updateK() {
-        if (this.elo < Config.lowerBoundElo) {
-            this.k = Config.lowerBoundK;
-        } else if (this.elo < Config.upperBoundElo) {  // linear function from lower bound to upper bound
-            this.k = ((this.elo - Config.lowerBoundElo) / (Config.upperBoundElo - Config.lowerBoundElo)) * (Config.upperBoundK - Config.lowerBoundK) + Config.lowerBoundK;
-        } else {  // >= upperBoundElo
-            this.k = Config.upperBoundK;
-        }
     }
 
     public getElo(): number { return this.elo; }
-    public setElo(elo: number) {
-        this.elo = elo;
-        this.updateK();
-    }
+    public setElo(elo: number) { this.elo = elo; }
 
-    public getK() : number { return this.k; }
+    public getK(score: Score) {
+        // K-Factor, used to determine the weight of a win or a loss (or a draw) depending on the elo
+        switch (score) {
+            case Score.Win: return Elo.linearFunction(Config.lowerBoundElo, Config.upperBoundElo, Config.lowerBoundKOnWin, Config.upperBoundKOnWin, this.elo);
+            case Score.Loss: return Elo.linearFunction(Config.lowerBoundElo, Config.upperBoundElo, Config.lowerBoundKOnLoss, Config.upperBoundKOnLoss, this.elo);
+            case Score.Draw: return Elo.linearFunction(Config.lowerBoundElo, Config.upperBoundElo, Config.lowerBoundKOnDraw, Config.upperBoundKOnDraw, this.elo);
+        }
+    }
 }
 
 class Elo {
@@ -36,13 +28,23 @@ class Elo {
 
     public static newElo(player: Player, score: Score, expScore: number): number {
         // calculated the elo added to the old elo
-        let eloDiff = Math.floor(player.getK() * (score - expScore));
+        let eloDiff = Math.floor(player.getK(score) * (score - expScore));
         // gain at least 1 elo on win
         if (score == Score.Win && eloDiff < 1) {
             eloDiff = 1;
         }
-        //TODO: should we just set the eloDiff to 0 on Draw?
         return player.getElo() + eloDiff;
+    }
+
+    public static linearFunction(x1: number, x2: number, y1: number, y2: number, x: number): number {
+        // linear function with cut off edges from (x1, y1) to (x2, y2)
+        if (x < x1) {
+            return y1;
+        } else if (x < x2) {  // linear function from lower bound to upper bound
+            return ((x - x1) / (x2 - x1)) * (y2 - y1) + y1;
+        } else {  // >= rightX
+            return y2;
+        }
     }
 }
 
@@ -73,7 +75,7 @@ export class TwoPlayerGame {
         // determine the expected scores
         let expScoreA: number = Elo.expectedScore(this.playerA.getElo(), this.playerB.getElo());
         let expScoreB: number = Elo.expectedScore(this.playerB.getElo(), this.playerA.getElo());
-        
+
         // calc new elo
         let newEloA = Elo.newElo(this.playerA, scoreA, expScoreA);
         let newEloB = Elo.newElo(this.playerB, scoreB, expScoreB);
@@ -117,7 +119,7 @@ export default class TeamGame {
         this.teamB.forEach(player => {
             avgEloB += player.getElo() / this.teamB.length;
         });
-        
+
         // calculate the expected scores for every player (calculated with average enemy elo) and update elo
         this.teamA.forEach(player => {
             // calculated as if every player in team A fought against the average of team B
@@ -140,7 +142,7 @@ export enum Winner {
     None
 }
 
-export enum Score {
+enum Score {
     Win = 1,
     Loss = 0,
     Draw = 0.5
