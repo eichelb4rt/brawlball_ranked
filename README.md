@@ -5,7 +5,7 @@
 - suggested: Visual Studio Code with ESLint-extension
 - clone repository
 - `npm install`
-- insert `src/token.ts` (template: `src/token-template.ts`)
+- insert `src/keys.ts` (template: `src/keys-template.ts`)
 - `npm run build`
 - `npm start`
 
