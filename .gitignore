@@ -1,4 +1,5 @@
 node_modules/
 build/
 src/keys.ts
+src/testing.ts
 .vscode/
