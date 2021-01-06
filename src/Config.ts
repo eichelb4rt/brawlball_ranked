@@ -42,7 +42,9 @@ export default class Config {
 		{ name: "Platinum 4", start: 1872 },
 		{ name: "Platinum 5", start: 1936 },
 		{ name: "Diamond", start: 2000 }
-	]
+	];
+
+	static readonly queueWaitingTime = 30;	// time interval in seconds for refreshing match function
 
 	static readonly publicCommandsDir = 'commands';
 	static readonly secretCommandsDir = 'secret_commands';
