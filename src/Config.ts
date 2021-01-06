@@ -1,4 +1,6 @@
 import { Rank } from "./elo/Player";
+import { PoolSystem } from "./queue/Pool";
+import { QueueBlueprint } from "./queue/Queue";
 
 export default class Config {
 	static readonly lowerBoundElo = 800;
@@ -45,6 +47,18 @@ export default class Config {
 	];
 
 	static readonly queueWaitingTime = 30;	// time interval in seconds for refreshing match function
+
+	static readonly regions = [
+		"NA",
+		"EUR"
+	]
+
+	static readonly queues: QueueBlueprint[] = [
+		{ name: "Solo2v2", displayName: "Solo 2v2", poolSystem: PoolSystem.Solo2v2 },
+		{ name: "Team2v2", displayName: "Team 2v2", poolSystem: PoolSystem.Team2v2 },
+		{ name: "Solo3v3", displayName: "Solo 3v3", poolSystem: PoolSystem.Solo3v3 },
+		{ name: "Team3v3", displayName: "Team 3v3", poolSystem: PoolSystem.Team3v3 }
+	]
 
 	static readonly publicCommandsDir = 'commands';
 	static readonly secretCommandsDir = 'secret_commands';

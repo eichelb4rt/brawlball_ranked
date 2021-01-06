@@ -2,9 +2,11 @@ import Config from "../Config"
 import Elo, { Score } from "./Elo"
 
 export default class Player {
+    public readonly id: string; // discord id
     private elo: number = 800;  // these values will be overwritten
 
-    constructor(elo: number) {
+    constructor(id: string, elo: number) {
+        this.id = id;
         this.elo = elo;
     }
 

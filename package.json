@@ -19,7 +19,9 @@
   "homepage": "https://github.com/eichelb4rt/fsrinfo_discord_bot#readme",
   "dependencies": {
     "discord.js": "^12.2.0",
-    "typescript": "^4.0.3"
+    "typescript": "^4.0.3",
+    "sqlite": "^4.0.19",
+    "sqlite3": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^14.14.16",

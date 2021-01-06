@@ -1,5 +1,5 @@
 import { Message } from "discord.js"
-import SecretCommand from "../interface/SecretCommand";
+import SecretCommand from "../interfaces/SecretCommand";
 
 export default class LogMessage extends SecretCommand {
     

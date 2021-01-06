@@ -1,10 +1,9 @@
 import { Message, MessageEmbed } from "discord.js"
-import { CommandLoader } from "../CommandLoader";
+import CommandLoader from "../CommandLoader";
 import Config from "../Config";
-import { Command } from "../interface/Command";
-import { PublicCommand } from "../interface/PublicCommand";
+import PublicCommand from "../interfaces/PublicCommand";
 
-export default class Help extends Command {
+export default class Help extends PublicCommand {
     invokeStr: string = "!help";
     description: string = "Help! It's a flying spaghetti monster!";
     help: string = "!help";
