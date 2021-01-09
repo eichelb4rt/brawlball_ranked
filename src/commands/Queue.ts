@@ -22,7 +22,7 @@ export default class Queue extends PublicCommand {
         }).then((db) => {
             let BrawlID = db.get("SELECT BrawlhallaID FROM Users WHERE DiscordID = ?", DiscordID);
             let name = "TODO";  // get the Brawlhalla name
-
+            
         });
     }
 }

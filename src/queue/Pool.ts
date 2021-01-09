@@ -1,5 +1,5 @@
 import Player from "../elo/Player"
-import Match from "./Match";
+import Match from "../elo/Match";
 
 // Data Structure for Pool of Players
 export default class Pool {
@@ -9,9 +9,11 @@ export default class Pool {
         this.poolSystem = poolType;
     }
 
-    public add(player: Player) { }
+    public add(team: Player[]) { }
 
-    public getMatch(): Match | null {
+    public remove(players: Player[]) { }   // should remove every team that contains the players passed as argument
+
+    public async getMatch(): Promise<Match | null> {
         return null;
     }
 }

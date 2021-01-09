@@ -3,15 +3,16 @@ import Elo, { Score } from "./Elo"
 
 export default class Player {
     public readonly id: string; // discord id
-    private elo: number = 800;  // these values will be overwritten
+    public elo: number = 800;  // these values will be overwritten
 
     constructor(id: string, elo: number) {
         this.id = id;
         this.elo = elo;
     }
 
-    public getElo(): number { return this.elo; }
-    public setElo(elo: number) { this.elo = elo; }
+    public toString(): string {
+        return `${this.id}:\tElo: ${this.elo}\tRank: ${this.getRank()}`;
+    }
 
     public getK(score: Score) {
         // K-Factor, used to determine the weight of a win or a loss (or a draw) depending on the elo
