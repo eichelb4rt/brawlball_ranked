@@ -1,43 +1,6 @@
 import Player from "./Player"
 import Elo, { Score } from "./Elo"
-
-export class TwoPlayerGame {
-    private readonly playerA: Player;
-    private readonly playerB: Player;
-
-    constructor(playerA: Player, playerB: Player) {
-        this.playerA = playerA;
-        this.playerB = playerB;
-    }
-
-    public report(winner: Winner) {
-        // determine the actual scores
-        let scoreA: Score;
-        let scoreB: Score;
-        if (winner == Winner.PlayerA) {
-            scoreA = Score.Win;
-            scoreB = Score.Loss;
-        } else if (winner == Winner.PlayerB) {
-            scoreA = Score.Loss;
-            scoreB = Score.Win;
-        } else {
-            scoreA = Score.Draw;
-            scoreB = Score.Draw;
-        }
-
-        // determine the expected scores
-        let expScoreA: number = Elo.expectedScore(this.playerA.elo, this.playerB.elo);
-        let expScoreB: number = Elo.expectedScore(this.playerB.elo, this.playerA.elo);
-
-        // calc new elo
-        let newEloA = Elo.newElo(this.playerA, scoreA, expScoreA);
-        let newEloB = Elo.newElo(this.playerB, scoreB, expScoreB);
-
-        // update Elo
-        this.playerA.elo = newEloA;
-        this.playerB.elo = newEloB;
-    }
-}
+import Queue from "../queue/Queue";
 
 export default class Match {
     public readonly teamA: Player[];
@@ -52,18 +15,8 @@ export default class Match {
 
     public report(winner: Winner) {
         // determine the actual scores
-        let scoreA: Score;
-        let scoreB: Score;
-        if (winner == Winner.PlayerA) {
-            scoreA = Score.Win;
-            scoreB = Score.Loss;
-        } else if (winner == Winner.PlayerB) {
-            scoreA = Score.Loss;
-            scoreB = Score.Win;
-        } else {
-            scoreA = Score.Draw;
-            scoreB = Score.Draw;
-        }
+        let scoreA: Score = this.winnerToScore(this.teamA[0], winner);
+        let scoreB: Score = this.winnerToScore(this.teamB[0], winner);
 
         // calculate the average elo of every team for the expected scores
         let avgEloA: number = 0;
@@ -88,6 +41,57 @@ export default class Match {
             let newElo = Elo.newElo(player, scoreB, expScore);
             player.elo = newElo;
         });
+    }
+
+    public scoreToWinner(player: Player, score: Score): Winner {
+        if (this.teamA.includes(player)) {
+            switch (score) {
+                case Score.Win: return Winner.PlayerA;
+                case Score.Draw: return Winner.None;
+                case Score.Loss: return Winner.PlayerB;
+            }
+        } else if (this.teamB.includes(player)) {
+            switch (score) {
+                case Score.Win: return Winner.PlayerB;
+                case Score.Draw: return Winner.None;
+                case Score.Loss: return Winner.PlayerA;
+            }
+        } else {
+            throw new Error("Player not in Match!");
+        }
+    }
+
+    public winnerToScore(player: Player, winner: Winner): Score {
+        if (this.teamA.includes(player)) {
+            switch (winner) {
+                case Winner.PlayerA: return Score.Win;
+                case Winner.PlayerB: return Score.Loss;
+                case Winner.None: return Score.Draw;
+            }
+        } else if (this.teamB.includes(player)) {
+            switch (winner) {
+                case Winner.PlayerA: return Score.Loss;
+                case Winner.PlayerB: return Score.Win;
+                case Winner.None: return Score.Draw;
+            }
+        } else {
+            throw new Error("Player not in Match!");
+        }
+    }
+
+    public withQueue(queue: Queue): QueuedMatch {
+        let clone = new QueuedMatch(this.teamA, this.teamB, queue);
+        // (continue cloning properties if needed)
+        return clone;
+    }
+}
+
+export class QueuedMatch extends Match {
+    public readonly queue: Queue;
+
+    constructor(teamA: Player[], teamB: Player[], queue: Queue) {
+        super(teamA, teamB);
+        this.queue = queue;
     }
 }
 

@@ -1,17 +1,17 @@
 import { SubEvent } from "sub-events";
 import Config from "../Config";
-import Match from "../elo/Match";
+import Match, { QueuedMatch } from "../elo/Match";
 import Queue from "./Queue";
 
 export default class QueueManager {
     // singleton
     private static instance: QueueManager;
     public readonly queues: Map<[string, string], Queue>;   // [name, region]
-    public readonly onMatchFound: SubEvent<[Match, Queue]>;
+    public readonly onMatchFound: SubEvent<QueuedMatch>;
 
     private constructor() {
         this.queues = new Map();
-        this.onMatchFound = new SubEvent<[Match, Queue]>();
+        this.onMatchFound = new SubEvent<QueuedMatch>();
         // make queues
         for (let blueprint of Config.queues) {
             for (let region of Config.regions) {
@@ -21,7 +21,7 @@ export default class QueueManager {
                 this.queues.set([blueprint.name, region], queue);
                 // listen for matches and emit a match when found (bundles all onMatchFound into 1)
                 queue.onMatchFound.subscribe(match => {
-                    this.onMatchFound.emit([match, queue]);
+                    this.onMatchFound.emit(match.withQueue(queue));
                 });
             }
         }

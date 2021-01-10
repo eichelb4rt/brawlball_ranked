@@ -4,14 +4,14 @@ import Match from "../elo/Match"
 import { SubEvent } from "sub-events";
 
 export default class Queue {
-    public readonly name: string;   // name in the db
+    public readonly dbname: string;   // name in the db
     public readonly displayName: string;    // name that is displayed
     public readonly region: string;
     public readonly pool: Pool;    // pool of players
     public readonly onMatchFound: SubEvent<Match>;
 
     constructor(blueprint: QueueBlueprint, region: string) {
-        this.name = blueprint.name;
+        this.dbname = blueprint.name;
         if (blueprint.displayName) {
             this.displayName = blueprint.displayName;
         } else {
