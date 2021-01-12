@@ -6,17 +6,19 @@ import { SubEvent } from "sub-events";
 export default class Queue {
     public readonly dbname: string;   // name in the db
     public readonly displayName: string;    // name that is displayed
+    public readonly blueprint: QueueBlueprint;  // redundant but that's ok
     public readonly region: string;
     public readonly pool: Pool;    // pool of players
     public readonly onMatchFound: SubEvent<Match>;
 
     constructor(blueprint: QueueBlueprint, region: string) {
-        this.dbname = blueprint.name;
+        this.dbname = blueprint.dbname;
         if (blueprint.displayName) {
             this.displayName = blueprint.displayName;
         } else {
-            this.displayName = blueprint.name;
+            this.displayName = blueprint.dbname;
         }
+        this.blueprint = blueprint;
         this.region = region;
         this.pool = new Pool(blueprint.poolSystem);
         this.onMatchFound = new SubEvent<Match>();
@@ -36,7 +38,7 @@ export default class Queue {
 }
 
 export interface QueueBlueprint {
-    name: string;
+    dbname: string;
     displayName?: string;
     poolSystem: PoolSystem;
 }

@@ -4,6 +4,7 @@ import { QueuedMatch } from "./Match";
 import Player from "./Player";
 import sqlite3 from 'sqlite3'
 import { Database, open } from 'sqlite'
+import DBManager, { DBPlayer } from "../db/DBManager";
 
 export default class MatchManager {
     // manages matches and reports results to db
@@ -15,13 +16,13 @@ export default class MatchManager {
         const queueManager: QueueManager = QueueManager.getInstance();
         queueManager.onMatchFound.subscribe(queuedMatch => {
             this.addMatch(queuedMatch);
-        })
+        });
     }
 
     public getInstance(): MatchManager {
-        if (MatchManager.instance)
-            return MatchManager.instance;
-        return new MatchManager();
+        if (!MatchManager.instance)
+            MatchManager.instance = new MatchManager();
+        return MatchManager.instance;
     }
 
     removeMatch(match: QueuedMatch) {
@@ -57,7 +58,7 @@ export default class MatchManager {
 
     private async updateDB(db: Database<sqlite3.Database, sqlite3.Statement>, match: QueuedMatch) {
         // make sure table name exists to prevent SQL Injections
-        if (await this.existsTable(db, match.queue.dbname)) {
+        if (await DBManager.getInstance().existsTable(match.queue.dbname)) {
             // save new elo to db for every player in the match
             for (let player of match.players) {
                 // search for player in queue db
@@ -74,15 +75,7 @@ export default class MatchManager {
         }
     }
 
-    private async existsTable(db: Database<sqlite3.Database, sqlite3.Statement>, table: string): Promise<boolean> {
-        const result = await db.get("SELECT 1 FROM sqlite_master WHERE type='table' and name = ?", table) as number // get 1 if table name exists
-        // undefined if not found
-        if (result)
-            return true;
-        return false;
-    }
-
-    findMatch(player: Player): QueuedMatch | null {
+    findMatch(player: Player): QueuedMatch | undefined {
         // look for a match containing the player
         for (let match of this.ongoingMatches) {
             for (let matchPlayer of match.players) {
@@ -92,11 +85,6 @@ export default class MatchManager {
             }
         }
         // nothing found
-        return null;
+        return undefined;
     }
-}
-
-interface DBPlayer {
-    Name: string,
-    Elo: number
 }

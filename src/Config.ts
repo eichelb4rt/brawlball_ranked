@@ -8,6 +8,8 @@ export default class Config {
 	// Elo & Ranks
 	////////////////////////////////////////////////////////////////
 
+	static readonly eloOnStart = 800;	// elo for a new player
+
 	static readonly lowerBoundElo = 800;
 	static readonly upperBoundElo = 3000;
 
@@ -63,10 +65,10 @@ export default class Config {
 	];
 
 	static readonly queues: QueueBlueprint[] = [
-		{ name: "Solo2v2", displayName: "Solo 2v2", poolSystem: PoolSystem.Solo2v2 },
-		{ name: "Team2v2", displayName: "Team 2v2", poolSystem: PoolSystem.Team2v2 },
-		{ name: "Solo3v3", displayName: "Solo 3v3", poolSystem: PoolSystem.Solo3v3 },
-		{ name: "Team3v3", displayName: "Team 3v3", poolSystem: PoolSystem.Team3v3 }
+		{ dbname: "Solo2v2", displayName: "Solo 2v2", poolSystem: PoolSystem.Solo2v2 },
+		{ dbname: "Team2v2", displayName: "Team 2v2", poolSystem: PoolSystem.Team2v2 },
+		{ dbname: "Solo3v3", displayName: "Solo 3v3", poolSystem: PoolSystem.Solo3v3 },
+		{ dbname: "Team3v3", displayName: "Team 3v3", poolSystem: PoolSystem.Team3v3 }
 	];
 
 	////////////////////////////////////////////////////////////////
