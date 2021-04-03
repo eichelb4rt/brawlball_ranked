@@ -4,7 +4,7 @@ import Queue from "./Queue";
 export default class Team {
     // IDEA: divide into Team and PremadeTeam extends Team
     public players: Player[];
-    public queue: Queue | undefined;    // the team can be constructed whilst inside a specific queue.
+    public _queue: Queue | undefined;    // the team can be constructed whilst inside a specific queue.
 
     constructor(queue?: Queue) {
         this.players = [];
@@ -58,6 +58,22 @@ export default class Team {
             this.players.splice(index, 1);
         }
         player.team = undefined
+    }
+
+    public set queue(queue: Queue | undefined) {    // does not include them actually joining the pool
+        if (queue != undefined) {
+            if (!this._queue) {
+                this._queue = queue;
+            } else {
+                throw new Error("Team is already in a queue!");
+            }
+        } else {
+            this._queue = undefined;
+        }
+    }
+
+    public get queue(): Queue | undefined {
+        return this._queue;
     }
 }
 

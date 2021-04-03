@@ -8,7 +8,7 @@ import Team from "../queue/Team";
 export default class Player {
     public readonly id: string; // discord id
     public readonly onEloChange: SubEvent<number>;  // emits whenever player elo changes
-    public queue: Queue | undefined;    // Queue that the player is searching for match / fighting in
+    public _queue: Queue | undefined;    // Queue that the player is searching for match / fighting in
     private _elo: Map<QueueBlueprint, number>;
     public team: Team | undefined;
     private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
@@ -72,20 +72,25 @@ export default class Player {
             if (!oldElo)
                 oldElo = Config.eloOnStart;
             this._elo.set(this.queue.blueprint, elo);
-            this.updateEloInDB()
+            this.updateEloInDB();
             this.onEloChange.emit(elo - oldElo);
         }
     }
 
-    public setQueue(queue: Queue) {    // does not include them actually joining the pool
-        if (!this.queue)
-            this.queue = queue;
-        else
-            throw new Error("Player is already in a queue!");
+    public set queue(queue: Queue | undefined) {    // does not include them actually joining the pool
+        if (queue != undefined) {
+            if (!this._queue) {
+                this._queue = queue;
+            } else {
+                throw new Error("Player is already in a queue!");
+            }
+        } else {
+            this._queue = undefined;
+        }
     }
 
-    public unsetQueue() {
-        this.queue = undefined;
+    public get queue(): Queue | undefined {
+        return this._queue;
     }
 
     public toString(): string {

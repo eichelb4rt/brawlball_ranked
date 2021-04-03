@@ -36,6 +36,11 @@ export default class Match {
             let newElo = Elo.newElo(player, scoreB, expScore);
             player.elo = newElo;
         });
+        // the players are now not in the queue anymore
+        for (let player of this.players) {
+            player.queue = undefined;
+            player.team!.queue = undefined;
+        }
     }
 
     public scoreToWinner(player: Player, score: Score): Winner {

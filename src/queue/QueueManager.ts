@@ -50,7 +50,14 @@ export default class QueueManager {
 
         // check if the team can be added to the queue
         if (team.players.length > pool.maxPremadeSize) {
-            throw new Error(`The maxmimum premade team size of this queue (${pool.maxPremadeSize}) was exceeded. Your team has ${team.players.length} members.`)
+            throw new Error(`The maxmimum premade team size of this queue (${pool.maxPremadeSize}) was exceeded. Your team has ${team.players.length} members.`);
+        }
+        if (team.queue) {
+            if (team.queue == queue) {
+                throw new Error(`The team is already in this queue.`);
+            } else {
+                throw new Error(`The team is already in a different queue.`);
+            }
         }
         for (let player of team.players) {
             if (player.queue) { // if a player is already in a queue, we can't add the team
@@ -60,9 +67,14 @@ export default class QueueManager {
 
         // add the team to the queue
         pool.add(team);
+        team.queue = queue;
         for (let player of team.players) {
-            player.setQueue(queue);
+            player.queue = queue;
         }
+    }
+
+    public abortQueue(team: Team) {
+
     }
 }
 
