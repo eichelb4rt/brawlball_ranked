@@ -1,11 +1,13 @@
-import Player from "../elo/Player";
-import Queue from "./Queue";
-import QueueManager from "./QueueManager";
+import Match from "../matches/Match";
+import Player from "./Player";
+import Queue from "../queues/Queue";
+import QueueManager from "../queues/QueueManager";
 
 export default class Team {
     // IDEA: divide into Team and PremadeTeam extends Team
     public players: Player[];
-    public _queue: Queue | undefined;    // the team can be constructed whilst inside a specific queue.
+    private _queue: Queue | undefined;    // the team can be constructed whilst inside a specific queue.
+    private _match: Match | undefined;
 
     constructor(queue?: Queue) {
         this.players = [];
@@ -81,6 +83,22 @@ export default class Team {
 
     public get queue(): Queue | undefined {
         return this._queue;
+    }
+
+    public set match(match: Match | undefined) {
+        if (match != undefined) {
+            if (!this._match) {
+                this._match = match;
+            } else if (match != this._match) {
+                throw new Error("Team is already in different a match!");
+            }
+        } else {
+            this._match = undefined;
+        }
+    }
+
+    public get match(): Match | undefined {
+        return this._match;
     }
 }
 

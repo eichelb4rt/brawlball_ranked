@@ -1,10 +1,10 @@
 import { SubEvent } from "sub-events";
 import Config from "../Config";
-import Match, { QueuedMatch } from "../elo/Match";
-import Player from "../elo/Player";
+import Match, { QueuedMatch } from "../matches/Match";
+import Player from "../players/Player";
 import Pool from "./Pool";
 import Queue, { QueueBlueprint } from "./Queue";
-import Team from "./Team";
+import Team from "../players/Team";
 
 export default class QueueManager {
     // singleton
@@ -49,15 +49,18 @@ export default class QueueManager {
         let pool: Pool = queue.pool;
 
         // check if the team can be added to the queue
-        if (team.players.length > pool.maxPremadeSize) {
+        if (team.players.length > pool.maxPremadeSize) {    // team too big for queue (e.g. 3 people for 2v2 or 2 people for Solo2v2)
             throw new Error(`The maxmimum premade team size of this queue (${pool.maxPremadeSize}) was exceeded. Your team has ${team.players.length} members.`);
         }
-        if (team.queue) {
+        if (team.queue) {   // Can't queue twice
             if (team.queue == queue) {
                 throw new Error(`The team is already in this queue.`);
             } else {
                 throw new Error(`The team is already in a different queue.`);
             }
+        }
+        if (team.match) {   // Can't queue if in a match
+            throw new Error(`The team is already in a match.`)
         }
         for (let player of team.players) {
             if (player.queue) { // if a player is already in a queue, we can't add the team

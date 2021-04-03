@@ -1,7 +1,7 @@
-import QueueManager from "../queue/QueueManager";
+import QueueManager from "../queues/QueueManager";
 import { Score } from "./Elo";
 import { QueuedMatch } from "./Match";
-import Player from "./Player";
+import Player from "../players/Player";
 import sqlite3 from 'sqlite3'
 import { Database, open } from 'sqlite'
 import DBManager, { DBPlayer } from "../db/DBManager";

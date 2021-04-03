@@ -1,14 +1,16 @@
 import { SubEvent } from "sub-events";
 import Config from "../Config"
-import Queue, { QueueBlueprint } from "../queue/Queue";
-import Elo, { Score } from "./Elo"
+import Queue, { QueueBlueprint } from "../queues/Queue";
+import Elo, { Score } from "../matches/Elo"
 import DBManager, { DBPlayer } from "../db/DBManager";
-import Team from "../queue/Team";
+import Team from "./Team";
+import Match from "../matches/Match";
 
 export default class Player {
     public readonly id: string; // discord id
     public readonly onEloChange: SubEvent<number>;  // emits whenever player elo changes
-    public _queue: Queue | undefined;    // Queue that the player is searching for match / fighting in
+    public _queue: Queue | undefined;    // Queue that the player is searching for match in
+    private _match: Match | undefined;  // Match that the player is fighting in
     private _elo: Map<QueueBlueprint, number>;
     public team: Team | undefined;
     private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
@@ -91,6 +93,22 @@ export default class Player {
 
     public get queue(): Queue | undefined {
         return this._queue;
+    }
+
+    public set match(match: Match | undefined) {
+        if (match != undefined) {
+            if (!this._match) {
+                this._match = match;
+            } else {
+                throw new Error("Player is already in a match!");
+            }
+        } else {
+            this._match = undefined;
+        }
+    }
+
+    public get match(): Match | undefined {
+        return this._match;
     }
 
     public toString(): string {

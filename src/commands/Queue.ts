@@ -1,5 +1,5 @@
 import { Message } from "discord.js"
-import Player from "../elo/Player";
+import Player from "../players/Player";
 import PublicCommand from "../interfaces/PublicCommand";
 import sqlite3 from 'sqlite3'
 import { Database, open } from 'sqlite'

@@ -1,4 +1,4 @@
-import Player from "./Player"
+import Player from "../players/Player"
 
 export default class Elo {
     // static class for elo calculations

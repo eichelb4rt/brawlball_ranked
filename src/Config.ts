@@ -1,6 +1,6 @@
-import { Rank } from "./elo/Player";
-import Pool, { PoolSystem } from "./queue/Pool";
-import { QueueBlueprint } from "./queue/Queue";
+import { Rank } from "./players/Player";
+import Pool, { PoolSystem } from "./queues/Pool";
+import { QueueBlueprint } from "./queues/Queue";
 
 export default class Config {
 	////////////////////////////////////////////////////////////////

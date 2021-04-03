@@ -1,6 +1,6 @@
-import Player from "../elo/Player"
-import Match from "../elo/Match";
-import Team from "./Team";
+import Player from "../players/Player"
+import Match from "../matches/Match";
+import Team from "../players/Team";
 
 // Data Structure for Pool of Players
 export default abstract class Pool {    // can't make properties static with an interface

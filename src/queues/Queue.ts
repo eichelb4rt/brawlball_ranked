@@ -1,7 +1,7 @@
 import Pool, { PoolSystem } from "./Pool"
 import PoolFactory from "./PoolFactory"
 import Config from "../Config"
-import Match from "../elo/Match"
+import Match from "../matches/Match"
 import { SubEvent } from "sub-events";
 
 export default class Queue {
@@ -33,7 +33,17 @@ export default class Queue {
         setInterval(async () => {
             let match: Match | null = (await this.pool.getMatch());   // ask the Pool to find a Match - NotNull assertion
             if (match) {
-                this.pool.remove(match.players);    // remove match from pool
+                // remove match players from pool and queue
+                this.pool.remove(match.players);
+                for (let player of match.players) {
+                    player.queue = undefined;
+                    player.team!.queue = undefined;
+                }
+                // link the players and teams to the match
+                for (let player of match.players) {
+                    player.match = match;
+                    player.team!.match = match;
+                }
                 this.onMatchFound.emit(match);    // return the match to subscribers
             }
         }, Config.queueWaitingTime * 1000)  // Config entry is in seconds, this is in milli seconds

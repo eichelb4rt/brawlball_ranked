@@ -1,7 +1,7 @@
-import Player from "./Player"
+import Player from "../players/Player"
 import Elo, { Score } from "./Elo"
-import Queue from "../queue/Queue";
-import Team from "../queue/Team";
+import Queue from "../queues/Queue";
+import Team from "../players/Team";
 
 export default class Match {
     public readonly teamA: Team;
@@ -36,11 +36,11 @@ export default class Match {
             let newElo = Elo.newElo(player, scoreB, expScore);
             player.elo = newElo;
         });
-        
-        // the players are now not in the queue anymore
+
+        // the match is over, link can be deleted
         for (let player of this.players) {
-            player.queue = undefined;
-            player.team!.queue = undefined;
+            player.match = undefined;
+            player.team!.match = undefined;
         }
     }
 
