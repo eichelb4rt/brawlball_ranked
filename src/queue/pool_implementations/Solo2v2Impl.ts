@@ -1,7 +1,7 @@
 import Match from "../../elo/Match";
 import Player from "../../elo/Player";
 import Pool, { PoolSystem } from "../Pool";
-import Team from "../Team";
+import Team, { JoinConfig } from "../Team";
 
 export default class Solo2v2Impl extends Pool {
     static readonly poolSystem = PoolSystem.Solo2v2;
@@ -37,12 +37,12 @@ export default class Solo2v2Impl extends Pool {
             // put the first half in team a
             let teamA: Team = new Team();
             for (let i = 0; i < this.maxTeamSize; i++) {
-                teamA.join(players[i])
+                teamA.join(players[i], JoinConfig.System)
             }
             // put the second half in team b
             let teamB: Team = new Team();
             for (let i = this.maxTeamSize; i < 2 * this.maxTeamSize; i++) {
-                teamB.join(players[i])
+                teamB.join(players[i], JoinConfig.System)
             }
             // return the found match
             return new Match(teamA, teamB);

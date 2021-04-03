@@ -40,12 +40,16 @@ export default class Team {
         // now check if player is already in a different team
         if (config == JoinConfig.Weak) {
             if (player.team) {
-                throw new Error(`Player is already in a team, sure you want to leave it?`);
+                throw new Error(`Player is already in a different team, sure you want to leave it?`);
             }
         }
 
         // everything went alright
         this.players.push(player);
+        // only if the player wanted to join by himself, it will be set to be his team
+        if (config != JoinConfig.System) {
+            player.team = this;
+        }
     }
 
     public kick(player: Player) {
@@ -53,6 +57,7 @@ export default class Team {
         if (index > -1) {
             this.players.splice(index, 1);
         }
+        player.team = undefined
     }
 }
 
