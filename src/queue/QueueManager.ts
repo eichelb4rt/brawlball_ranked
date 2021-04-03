@@ -1,7 +1,10 @@
 import { SubEvent } from "sub-events";
 import Config from "../Config";
 import Match, { QueuedMatch } from "../elo/Match";
+import Player from "../elo/Player";
+import Pool from "./Pool";
 import Queue, { QueueBlueprint } from "./Queue";
+import Team from "./Team";
 
 export default class QueueManager {
     // singleton
@@ -9,6 +12,13 @@ export default class QueueManager {
     // bundles all the onMatchFound events from a queue into 1
     
     private static instance: QueueManager;
+    public static getInstance(): QueueManager {
+        if (!QueueManager.instance) {
+            QueueManager.instance = new QueueManager();
+        }
+        return QueueManager.instance;
+    }
+
     public readonly queues: QueueMap;   // [dbname, region]
     public readonly onMatchFound: SubEvent<QueuedMatch>;
 
@@ -34,11 +44,25 @@ export default class QueueManager {
         }
     }
 
-    public static getInstance(): QueueManager {
-        if (!QueueManager.instance) {
-            QueueManager.instance = new QueueManager();
+    public addToQueue(poolname: string, region: string, team: Team) {
+        let queue: Queue = this.queues[poolname][region];
+        let pool: Pool = queue.pool;
+
+        // check if the team can be added to the queue
+        if (team.players.length > pool.maxPremadeSize) {
+            throw new Error(`The maxmimum premade team size of this queue (${pool.maxPremadeSize}) was exceeded. Your team has ${team.players.length} members.`)
         }
-        return QueueManager.instance;
+        for (let player of team.players) {
+            if (player.queue) { // if a player is already in a queue, we can't add the team
+                throw new Error(`Player ${player.id} is already in a queue!`);  // maybe players name instead?
+            }
+        }
+
+        // add the team to the queue
+        pool.add(team);
+        for (let player of team.players) {
+            player.setQueue(queue);
+        }
     }
 }
 
