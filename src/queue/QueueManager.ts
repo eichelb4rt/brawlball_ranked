@@ -66,15 +66,19 @@ export default class QueueManager {
         }
 
         // add the team to the queue
-        pool.add(team);
-        team.queue = queue;
-        for (let player of team.players) {
+        pool.add(team); // add it to the pool
+        team.queue = queue; // set the team queue
+        for (let player of team.players) {  // set the queue for every player in the team
             player.queue = queue;
         }
     }
 
     public abortQueue(team: Team) {
-
+        team.queue!.pool.remove(team.players);  // remove players from pool
+        team.queue = undefined; // unset team queue
+        for (let player of team.players) {  // unset player queues
+            player.queue = undefined;
+        }
     }
 }
 

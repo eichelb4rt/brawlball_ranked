@@ -1,5 +1,6 @@
 import Player from "../elo/Player";
 import Queue from "./Queue";
+import QueueManager from "./QueueManager";
 
 export default class Team {
     // IDEA: divide into Team and PremadeTeam extends Team
@@ -38,9 +39,11 @@ export default class Team {
         }
 
         // now check if player is already in a different team
-        if (config == JoinConfig.Weak) {
-            if (player.team) {
+        if (player.team) {
+            if (config == JoinConfig.Weak) {
                 throw new Error(`Player is already in a different team, sure you want to leave it?`);
+            } else if (config == JoinConfig.Strong) {
+                player.team.kick(player);   // remove the player from the old team
             }
         }
 
@@ -53,6 +56,10 @@ export default class Team {
     }
 
     public kick(player: Player) {
+        // if the team is in a queue, abort the queue
+        let queueManager: QueueManager = QueueManager.getInstance();
+        queueManager.abortQueue(this);
+        // now remove the player from the team
         const index = this.players.indexOf(player);
         if (index > -1) {
             this.players.splice(index, 1);
