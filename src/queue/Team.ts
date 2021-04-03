@@ -11,6 +11,14 @@ export default class Team {
         this.queue = queue;
     }
 
+    public averageElo(): number {
+        let avgElo = 0;
+        this.players.forEach(player => {
+            avgElo += player.elo / this.players.length;
+        });
+        return avgElo;
+    }
+
     public join(player: Player, config: JoinConfig = JoinConfig.Weak) {
         // lets a new player join the team if it's not already full
         // if it's not forced, it will fail and throw an error if the player is already in a team

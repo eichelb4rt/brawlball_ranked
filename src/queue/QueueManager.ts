@@ -54,7 +54,7 @@ export default class QueueManager {
         }
         for (let player of team.players) {
             if (player.queue) { // if a player is already in a queue, we can't add the team
-                throw new Error(`Player ${player.id} is already in a queue!`);  // maybe players name instead?
+                throw new Error(`Player ${player.id} is already in a queue!`);  // TODO: maybe players name instead?
             }
         }
 
