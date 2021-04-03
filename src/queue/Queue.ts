@@ -1,4 +1,5 @@
 import Pool, { PoolSystem } from "./Pool"
+import PoolFactory from "./PoolFactory"
 import Config from "../Config"
 import Match from "../elo/Match"
 import { SubEvent } from "sub-events";
@@ -20,7 +21,7 @@ export default class Queue {
         }
         this.blueprint = blueprint;
         this.region = region;
-        this.pool = new Pool(blueprint.poolSystem);
+        this.pool = PoolFactory.getInstance().newPool(blueprint.poolSystem);
         this.onMatchFound = new SubEvent<Match>();
         this.startSearching();
     }

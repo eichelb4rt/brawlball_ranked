@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "build": "tsc",
-    "start": "node build/main.js"
+    "start": "node build/main.js",
+    "test": "node build/testing.js"
   },
   "repository": {
     "type": "git",
@@ -18,11 +19,12 @@
   },
   "homepage": "https://github.com/eichelb4rt/fsrinfo_discord_bot#readme",
   "dependencies": {
+    "axios": "^0.21.1",
     "discord.js": "^12.2.0",
-    "typescript": "^4.0.3",
     "sqlite": "^4.0.19",
     "sqlite3": "^5.0.0",
-    "sub-events": "^1.8.7"
+    "sub-events": "^1.8.7",
+    "typescript": "^4.0.3"
   },
   "devDependencies": {
     "@types/node": "^14.14.16",

@@ -3,25 +3,56 @@ import Config from "../Config"
 import Queue, { QueueBlueprint } from "../queue/Queue";
 import Elo, { Score } from "./Elo"
 import DBManager, { DBPlayer } from "../db/DBManager";
+import Team from "../queue/Team";
 
 export default class Player {
     public readonly id: string; // discord id
+    public readonly onEloChange: SubEvent<number>;  // emits whenever player elo changes
     public queue: Queue | undefined;    // Queue that the player is searching for match / fighting in
-    public _elo: Map<QueueBlueprint, number>;
-    public readonly onEloChange: SubEvent<number>;
+    private _elo: Map<QueueBlueprint, number>;
+    public team: Team | undefined;
+    private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
 
     constructor(id: string) {
         this.id = id;
-        this._elo = new Map<QueueBlueprint, number>();
+        this._elo = new Map();
+        this._setup = false;
         this.onEloChange = new SubEvent<number>();
+        this.setup();
+    }
+
+    public async setup() {
+        // await player.setup() to use elo stuff
+        // this can be "locked" this way because js is event-loop concurrent
+        if (!this._setup) {
+            await this.readEloFromDB()
+            this._setup = true
+        }
     }
 
     public async readEloFromDB() {
+        // gets a map of the elo for all the pools from the db
         const db = await DBManager.getInstance().db;
         for (let blueprint of Config.queues) {
             if (await DBManager.getInstance().existsTable(blueprint.dbname)) {
-                let elo = (await db.get(`SELECT * FROM ${blueprint.dbname} WHERE Name = ?`, [this.id]) as DBPlayer).Elo;
-                this._elo.set(blueprint, elo);
+                let elo_rows = await db.get(`SELECT * FROM ${blueprint.dbname} WHERE Name = ?`, [this.id]) as DBPlayer; // get entry from the db
+                let db_elo = Config.eloOnStart  // initiate elo
+                if (!elo_rows) {    // if there are no entries in the db, save the Config.eloOnStart (the current) value
+                    db.run(`INSERT INTO ${blueprint.dbname} VALUES(?,?)`, [this.id, db_elo]);
+                } else {    // if there is an entry, read it
+                    db_elo = elo_rows.Elo;
+                }
+                this._elo.set(blueprint, db_elo);
+            }
+        }
+    }
+
+    private async updateEloInDB() {
+        // updates the elo in the db (only for the queue the player is in rn)
+        if (this.queue) {
+            const db = await DBManager.getInstance().db;
+            if (await DBManager.getInstance().existsTable(this.queue.dbname)) {
+                db.run(`UPDATE ${this.queue.dbname} SET Elo = ? WHERE Name = ?`, [this.elo, this.id]);
             }
         }
     }
@@ -41,6 +72,7 @@ export default class Player {
             if (!oldElo)
                 oldElo = Config.eloOnStart;
             this._elo.set(this.queue.blueprint, elo);
+            this.updateEloInDB()
             this.onEloChange.emit(elo - oldElo);
         }
     }
@@ -57,7 +89,7 @@ export default class Player {
     }
 
     public toString(): string {
-        return `${this.id}:\tElo: ${this._elo}\tRank: ${this.getRank()}`;
+        return `${this.id}:\tElo: ${this.elo}\tRank: ${this.getRank()}`;
     }
 
     public getK(score: Score) {

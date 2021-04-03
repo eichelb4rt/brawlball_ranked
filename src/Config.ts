@@ -1,8 +1,13 @@
 import { Rank } from "./elo/Player";
-import { PoolSystem } from "./queue/Pool";
+import Pool, { PoolSystem } from "./queue/Pool";
 import { QueueBlueprint } from "./queue/Queue";
 
 export default class Config {
+	////////////////////////////////////////////////////////////////
+	// APIs
+	////////////////////////////////////////////////////////////////
+
+	static readonly BrawlAPI = "https://api.brawlhalla.com";
 
 	////////////////////////////////////////////////////////////////
 	// Elo & Ranks
@@ -70,6 +75,9 @@ export default class Config {
 		{ dbname: "Solo3v3", displayName: "Solo 3v3", poolSystem: PoolSystem.Solo3v3 },
 		{ dbname: "Team3v3", displayName: "Team 3v3", poolSystem: PoolSystem.Team3v3 }
 	];
+
+	static readonly poolDir = "queue";
+	static readonly poolImplementationsDir = "pool_implementations";
 
 	////////////////////////////////////////////////////////////////
 	// Commands

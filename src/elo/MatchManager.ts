@@ -19,7 +19,7 @@ export default class MatchManager {
         });
     }
 
-    public getInstance(): MatchManager {
+    public static getInstance(): MatchManager {
         if (!MatchManager.instance)
             MatchManager.instance = new MatchManager();
         return MatchManager.instance;

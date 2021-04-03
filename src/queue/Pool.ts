@@ -2,20 +2,14 @@ import Player from "../elo/Player"
 import Match from "../elo/Match";
 
 // Data Structure for Pool of Players
-export default class Pool {
-    public readonly poolSystem: PoolSystem;
+export default abstract class Pool {    // can't make properties static with an interface
+    static readonly poolSystem: PoolSystem;
+    abstract readonly maxPremadeSize: number;
+    abstract readonly maxTeamSize: number;
 
-    constructor(poolType: PoolSystem, players?: Player[]) {
-        this.poolSystem = poolType;
-    }
-
-    public add(team: Player[]) { }
-
-    public remove(players: Player[]) { }   // should remove every team that contains the players passed as argument
-
-    public async getMatch(): Promise<Match | null> {
-        return null;
-    }
+    abstract add(team: Player[]): void;
+    abstract remove(players: Player[]): void;   // should remove every team that contains the players passed as argument
+    abstract getMatch(): Promise<Match | null>;
 }
 
 export enum PoolSystem {
