@@ -35,15 +35,6 @@ export default class Queue {
             if (match) {
                 // remove match players from pool and queue
                 this.pool.remove(match.players);
-                for (let player of match.players) {
-                    player.queue = undefined;
-                    player.team!.queue = undefined;
-                }
-                // link the players and teams to the match
-                for (let player of match.players) {
-                    player.match = match;
-                    player.team!.match = match;
-                }
                 this.onMatchFound.emit(match);    // return the match to subscribers
             }
         }, Config.queueWaitingTime * 1000)  // Config entry is in seconds, this is in milli seconds

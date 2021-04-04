@@ -36,12 +36,6 @@ export default class Match {
             let newElo = Elo.newElo(player, scoreB, expScore);
             player.elo = newElo;
         });
-
-        // the match is over, link can be deleted
-        for (let player of this.players) {
-            player.match = undefined;
-            player.team!.match = undefined;
-        }
     }
 
     public scoreToWinner(player: Player, score: Score): Winner {

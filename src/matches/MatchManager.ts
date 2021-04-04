@@ -15,7 +15,7 @@ export default class MatchManager {
         this.ongoingMatches = [];
         const queueManager: QueueManager = QueueManager.getInstance();
         queueManager.onMatchFound.subscribe(queuedMatch => {
-            this.addMatch(queuedMatch);
+            this.startMatch(queuedMatch);
         });
     }
 
@@ -25,53 +25,47 @@ export default class MatchManager {
         return MatchManager.instance;
     }
 
-    removeMatch(match: QueuedMatch) {
+    private removeMatch(match: QueuedMatch) {
         const index = this.ongoingMatches.indexOf(match);
         if (index > -1) {
             this.ongoingMatches.splice(index, 1);
         }
     }
 
-    addMatch(match: QueuedMatch) {
+    public startMatch(match: QueuedMatch) {
+        // check if the match can legitimately be started without problems
+        for (let player of match.players) {
+            if (player.match) {
+                throw new Error(`Player ${player.id} is already in a match!`);  // TODO: maybe players name instead?
+            }
+        }
+        // remove player from the queue
+        for (let player of match.players) {
+            player.queue = undefined;
+            player.team!.queue = undefined;
+        }
+        // start the match
         this.ongoingMatches.push(match);
+        for (let player of match.players) {
+            player.match = match;
+            player.team!.match = match;
+        }
     }
 
-    report(player: Player, score: Score) {
+    public report(player_reporting: Player, score: Score) {
         // a player reports a match on Discord
-        const match = this.findMatch(player);
+        const match = this.findMatch(player_reporting);
         if (!match) {
             throw new Error("Player not in a Match!");
         }
-        const winner = match.scoreToWinner(player, score);
+        const winner = match.scoreToWinner(player_reporting, score);
         match.report(winner);
         // remove it from ongoing matches
         this.removeMatch(match);
-        // save new results to db
-        open({
-            filename: "../../elo.db",   // TODO: doesn't work yet i believe
-            driver: sqlite3.cached.Database,
-            mode: sqlite3.OPEN_READWRITE
-        }).then((db) => {
-            this.updateDB(db, match);
-        });
-    }
-
-    private async updateDB(db: Database<sqlite3.Database, sqlite3.Statement>, match: QueuedMatch) {
-        // make sure table name exists to prevent SQL Injections
-        if (await DBManager.getInstance().existsTable(match.queue.dbname)) {
-            // save new elo to db for every player in the match
-            for (let player of match.players) {
-                // search for player in queue db
-                let result = await db.get(`SELECT * FROM ${match.queue.dbname} WHERE DiscordID = ?`, [player.id]) as DBPlayer;  // player.id is Discord ID
-                // check if they were found
-                if (!result) {
-                    // add player to db if they don't already exist
-                    await db.run(`INSERT INTO ${match.queue.dbname} VALUES(?,?)`, [player.id, player.elo]);
-                } else {
-                    // update elo if they do already exist
-                    await db.run(`UPDATE ${match.queue.dbname} SET Elo = ?`, [player.elo]);
-                }
-            }
+        // the match is over, links can be deleted
+        for (let player of match.players) {
+            player.match = undefined;
+            player.team!.match = undefined;
         }
     }
 

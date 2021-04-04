@@ -4,13 +4,13 @@ import Queue, { QueueBlueprint } from "../queues/Queue";
 import Elo, { Score } from "../matches/Elo"
 import DBManager, { DBPlayer } from "../db/DBManager";
 import Team from "./Team";
-import Match from "../matches/Match";
+import Match, { QueuedMatch } from "../matches/Match";
 
 export default class Player {
     public readonly id: string; // discord id
     public readonly onEloChange: SubEvent<number>;  // emits whenever player elo changes
     public _queue: Queue | undefined;    // Queue that the player is searching for match in
-    private _match: Match | undefined;  // Match that the player is fighting in
+    private _match: QueuedMatch | undefined;  // Match that the player is fighting in
     private _elo: Map<QueueBlueprint, number>;
     public team: Team | undefined;
     private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
@@ -39,9 +39,7 @@ export default class Player {
             if (await DBManager.getInstance().existsTable(blueprint.dbname)) {
                 let elo_rows = await db.get(`SELECT * FROM ${blueprint.dbname} WHERE Name = ?`, [this.id]) as DBPlayer; // get entry from the db
                 let db_elo = Config.eloOnStart  // initiate elo
-                if (!elo_rows) {    // if there are no entries in the db, save the Config.eloOnStart (the current) value
-                    db.run(`INSERT INTO ${blueprint.dbname} VALUES(?,?)`, [this.id, db_elo]);
-                } else {    // if there is an entry, read it
+                if (elo_rows) {    // if there is an entry, read it
                     db_elo = elo_rows.Elo;
                 }
                 this._elo.set(blueprint, db_elo);
@@ -49,19 +47,36 @@ export default class Player {
         }
     }
 
-    private async updateEloInDB() {
-        // updates the elo in the db (only for the queue the player is in rn)
-        if (this.queue) {
-            const db = await DBManager.getInstance().db;
-            if (await DBManager.getInstance().existsTable(this.queue.dbname)) {
-                db.run(`UPDATE ${this.queue.dbname} SET Elo = ? WHERE Name = ?`, [this.elo, this.id]);
+    private async updateEloInDB(queue: Queue) {
+        // updates the elo in the db (only for the given queue)
+        const dbManager: DBManager = DBManager.getInstance();
+        const db = await dbManager.db;
+        // make sure table name exists to prevent SQL Injections
+        if (await dbManager.existsTable(queue.dbname)) {
+            // search for player in queue db
+            let result = await db.get(`SELECT * FROM ${queue.dbname} WHERE DiscordID = ?`, [this.id]) as DBPlayer;  // player.id is Discord ID
+            // check if they were found
+            if (!result) {
+                // add player to db if they don't already exist
+                await db.run(`INSERT INTO ${queue.dbname} VALUES(?,?)`, [this.id, this.elo]);
+            } else {
+                // update elo if they do already exist
+                await db.run(`UPDATE ${queue.dbname} SET Elo = ?`, [this.elo]);
             }
         }
     }
 
     public get elo(): number {
-        if (this.queue) {
-            const elo = this._elo.get(this.queue.blueprint);
+        // figure out in which queue we want to set the elo
+        let queue: Queue | undefined = undefined;
+        if (this.match) {
+            queue = this.match.queue;
+        } else if (this.queue) {
+            queue = this.queue;
+        }
+        // get the elo
+        if (queue) {
+            const elo = this._elo.get(queue.blueprint);
             if (elo)
                 return elo;
         }
@@ -69,12 +84,20 @@ export default class Player {
     }
 
     public set elo(elo: number) {
-        if (this.queue) {
-            let oldElo = this._elo.get(this.queue.blueprint);
+        // figure out in which queue we want to set the elo
+        let queue: Queue | undefined = undefined;
+        if (this.match) {
+            queue = this.match.queue;
+        } else if (this.queue) {
+            queue = this.queue;
+        }
+        // set the elo
+        if (queue) {
+            let oldElo = this._elo.get(queue.blueprint);
             if (!oldElo)
                 oldElo = Config.eloOnStart;
-            this._elo.set(this.queue.blueprint, elo);
-            this.updateEloInDB();
+            this._elo.set(queue.blueprint, elo);
+            this.updateEloInDB(queue);
             this.onEloChange.emit(elo - oldElo);
         }
     }
@@ -95,7 +118,7 @@ export default class Player {
         return this._queue;
     }
 
-    public set match(match: Match | undefined) {
+    public set match(match: QueuedMatch | undefined) {
         if (match != undefined) {
             if (!this._match) {
                 this._match = match;
@@ -107,7 +130,7 @@ export default class Player {
         }
     }
 
-    public get match(): Match | undefined {
+    public get match(): QueuedMatch | undefined {
         return this._match;
     }
 

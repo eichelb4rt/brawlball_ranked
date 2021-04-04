@@ -66,6 +66,9 @@ export default class QueueManager {
             if (player.queue) { // if a player is already in a queue, we can't add the team
                 throw new Error(`Player ${player.id} is already in a queue!`);  // TODO: maybe players name instead?
             }
+            if (player.match) { // if a player is already in a match, we can't add the team
+                throw new Error(`Player ${player.id} is already in a match!`);  // TODO: maybe players name instead?
+            }
         }
 
         // add the team to the queue
