@@ -1,5 +1,5 @@
 import { Rank } from "./players/Player";
-import Pool, { PoolSystem } from "./queues/Pool";
+import { PoolSystem } from "./queues/Pool";
 import { QueueBlueprint } from "./queues/Queue";
 
 export default class Config {
@@ -76,7 +76,7 @@ export default class Config {
 		{ dbname: "Team3v3", displayName: "Team 3v3", poolSystem: PoolSystem.Team3v3 }
 	];
 
-	static readonly poolDir = "queue";
+	static readonly poolDir = "queues";
 	static readonly poolImplementationsDir = "pool_implementations";
 
 	////////////////////////////////////////////////////////////////

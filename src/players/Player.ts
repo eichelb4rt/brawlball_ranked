@@ -4,7 +4,7 @@ import Queue, { QueueBlueprint } from "../queues/Queue";
 import Elo, { Score } from "../matches/Elo"
 import DBManager, { DBPlayer } from "../db/DBManager";
 import Team from "./Team";
-import Match, { QueuedMatch } from "../matches/Match";
+import { QueuedMatch } from "../matches/Match";
 
 export default class Player {
     public readonly id: string; // discord id
@@ -54,32 +54,36 @@ export default class Player {
         // make sure table name exists to prevent SQL Injections
         if (await dbManager.existsTable(queue.dbname)) {
             // search for player in queue db
-            let result = await db.get(`SELECT * FROM ${queue.dbname} WHERE DiscordID = ?`, [this.id]) as DBPlayer;  // player.id is Discord ID
+            let result = await db.get(`SELECT * FROM ${queue.dbname} WHERE Name = ?`, [this.id]) as DBPlayer;  // player.id is Discord ID
             // check if they were found
             if (!result) {
                 // add player to db if they don't already exist
-                await db.run(`INSERT INTO ${queue.dbname} VALUES(?,?)`, [this.id, this.elo]);
+                await db.run(`INSERT INTO ${queue.dbname} VALUES(?,?)`, [this.id, this.getEloInQueue(queue.blueprint)]);
             } else {
                 // update elo if they do already exist
-                await db.run(`UPDATE ${queue.dbname} SET Elo = ?`, [this.elo]);
+                await db.run(`UPDATE ${queue.dbname} SET Elo = ? WHERE Name = ?`, [this.getEloInQueue(queue.blueprint), this.id]);
             }
         }
+    }
+
+    public getEloInQueue(queue: QueueBlueprint): number {
+        // figure out in which queue we want to set the elo
+        const elo = this._elo.get(queue);
+        if (elo)
+            return elo;
+        return Config.eloOnStart;
     }
 
     public get elo(): number {
         // figure out in which queue we want to set the elo
         let queue: Queue | undefined = undefined;
-        if (this.match) {
+        if (this.match)
             queue = this.match.queue;
-        } else if (this.queue) {
+        else if (this.queue)
             queue = this.queue;
-        }
         // get the elo
-        if (queue) {
-            const elo = this._elo.get(queue.blueprint);
-            if (elo)
-                return elo;
-        }
+        if (queue)
+            return this.getEloInQueue(queue.blueprint);
         return Config.eloOnStart;
     }
 
@@ -135,7 +139,11 @@ export default class Player {
     }
 
     public toString(): string {
-        return `${this.id}:\tElo: ${this.elo}\tRank: ${this.getRank()}`;
+        let to_string = `${this.id}:`;
+        for (let blueprint of this._elo.keys()) {
+            to_string = to_string.concat(`\t${blueprint.displayName}:\t${this.getEloInQueue(blueprint)} (${this.getRank(blueprint)})`);
+        }
+        return to_string;
     }
 
     public getK(score: Score) {
@@ -147,23 +155,24 @@ export default class Player {
         }
     }
 
-    public getRank(): string {
+    public getRank(blueprint: QueueBlueprint): string {
         // (kind of) binary search to get the rank for a given player elo
+        const elo = this.getEloInQueue(blueprint);
         // initate l and r
         let lowerBound: number = 0;
         let upperBound: number = Config.ranks.length - 1;
         // check the boundaries
-        if (this.elo < Config.ranks[lowerBound].start)
+        if (elo < Config.ranks[lowerBound].start)
             return Config.ranks[lowerBound].name;
-        if (this.elo > Config.ranks[upperBound].start)
+        if (elo > Config.ranks[upperBound].start)
             return Config.ranks[upperBound].name;
         // loop until we have a nice tight interval
         while (upperBound - lowerBound > 1) {
             let mid: number = Math.floor((lowerBound + upperBound) / 2);
-            if (this.elo < Config.ranks[mid].start) {
+            if (elo < Config.ranks[mid].start) {
                 // mid can be new upper bound
                 upperBound = mid;
-            } else if (this.elo > Config.ranks[mid].start) {
+            } else if (elo > Config.ranks[mid].start) {
                 // mid can be new lower bound
                 lowerBound = mid;
             } else {

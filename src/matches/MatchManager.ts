@@ -2,9 +2,6 @@ import QueueManager from "../queues/QueueManager";
 import { Score } from "./Elo";
 import { QueuedMatch } from "./Match";
 import Player from "../players/Player";
-import sqlite3 from 'sqlite3'
-import { Database, open } from 'sqlite'
-import DBManager, { DBPlayer } from "../db/DBManager";
 
 export default class MatchManager {
     // manages matches and reports results to db
@@ -54,7 +51,7 @@ export default class MatchManager {
 
     public report(player_reporting: Player, score: Score) {
         // a player reports a match on Discord
-        const match = this.findMatch(player_reporting);
+        const match = player_reporting.match;
         if (!match) {
             throw new Error("Player not in a Match!");
         }
@@ -67,18 +64,5 @@ export default class MatchManager {
             player.match = undefined;
             player.team!.match = undefined;
         }
-    }
-
-    findMatch(player: Player): QueuedMatch | undefined {
-        // look for a match containing the player
-        for (let match of this.ongoingMatches) {
-            for (let matchPlayer of match.players) {
-                if (player == matchPlayer) {
-                    return match;
-                }
-            }
-        }
-        // nothing found
-        return undefined;
     }
 }
