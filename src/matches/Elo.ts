@@ -1,4 +1,4 @@
-import Player from "./Player"
+import Player from "../players/Player"
 
 export default class Elo {
     // static class for elo calculations
@@ -13,7 +13,7 @@ export default class Elo {
         if (score == Score.Win && eloDiff < 1) {
             eloDiff = 1;
         }
-        return player.getElo() + eloDiff;
+        return player.elo + eloDiff;
     }
 
     public static linearFunction(x1: number, x2: number, y1: number, y2: number, x: number): number {

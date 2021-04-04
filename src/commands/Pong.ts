@@ -1,7 +1,7 @@
 import { Message } from "discord.js"
-import { Command } from "../interface/Command";
+import PublicCommand from "../interfaces/PublicCommand";
 
-export default class Pong extends Command {
+export default class Pong extends PublicCommand {
     invokeStr: string = "!pong";
     description: string = "it's ping but cooler";
     help: string = "!pong";

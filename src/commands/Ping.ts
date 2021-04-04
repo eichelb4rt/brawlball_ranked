@@ -1,7 +1,7 @@
 import { Message } from "discord.js"
-import { Command } from "../interface/Command";
+import PublicCommand from "../interfaces/PublicCommand";
 
-export default class Ping extends Command {
+export default class Ping extends PublicCommand {
     invokeStr: string = "!ping";
     description: string = "it's the fucking ping man";
     help: string = "!ping";

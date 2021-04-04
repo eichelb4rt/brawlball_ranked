@@ -1,6 +1,20 @@
-import { Rank } from "./elo/Player";
+import { Rank } from "./players/Player";
+import { PoolSystem } from "./queues/Pool";
+import { QueueBlueprint } from "./queues/Queue";
 
 export default class Config {
+	////////////////////////////////////////////////////////////////
+	// APIs
+	////////////////////////////////////////////////////////////////
+
+	static readonly BrawlAPI = "https://api.brawlhalla.com";
+
+	////////////////////////////////////////////////////////////////
+	// Elo & Ranks
+	////////////////////////////////////////////////////////////////
+
+	static readonly eloOnStart = 800;	// elo for a new player
+
 	static readonly lowerBoundElo = 800;
 	static readonly upperBoundElo = 3000;
 
@@ -42,7 +56,32 @@ export default class Config {
 		{ name: "Platinum 4", start: 1872 },
 		{ name: "Platinum 5", start: 1936 },
 		{ name: "Diamond", start: 2000 }
-	]
+	];
+
+	////////////////////////////////////////////////////////////////
+	// Queues
+	////////////////////////////////////////////////////////////////
+
+	static readonly queueWaitingTime = 3;	// time interval in seconds for refreshing match function
+
+	static readonly regions = [
+		"NA",
+		"EUR"
+	];
+
+	static readonly queues: QueueBlueprint[] = [
+		{ dbname: "Solo2v2", displayName: "Solo 2v2", poolSystem: PoolSystem.Solo2v2 },
+		{ dbname: "Team2v2", displayName: "Team 2v2", poolSystem: PoolSystem.Team2v2 },
+		{ dbname: "Solo3v3", displayName: "Solo 3v3", poolSystem: PoolSystem.Solo3v3 },
+		{ dbname: "Team3v3", displayName: "Team 3v3", poolSystem: PoolSystem.Team3v3 }
+	];
+
+	static readonly poolDir = "queues";
+	static readonly poolImplementationsDir = "pool_implementations";
+
+	////////////////////////////////////////////////////////////////
+	// Commands
+	////////////////////////////////////////////////////////////////
 
 	static readonly publicCommandsDir = 'commands';
 	static readonly secretCommandsDir = 'secret_commands';

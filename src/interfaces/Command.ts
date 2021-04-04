@@ -1,6 +1,6 @@
 import { Message } from "discord.js"
 
-export abstract class Command {
+export default abstract class Command {
     readonly enabled: boolean = true;
     abstract readonly invokeStr: string;
     

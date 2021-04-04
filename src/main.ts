@@ -1,7 +1,7 @@
 import Discord, { Message } from "discord.js";
-import { CommandLoader } from "./CommandLoader";
-import { Command } from "./interface/Command";
+import Command from "./interfaces/Command";
 import KEYS from './keys';
+import CommandLoader from "./CommandLoader";
 const client = new Discord.Client();
 const commandLoader = new CommandLoader();
 

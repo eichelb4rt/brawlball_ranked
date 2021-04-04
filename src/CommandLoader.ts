@@ -1,9 +1,9 @@
 import FS from "fs";
 import Path from "path";
 import Config from "./Config";
-import { Command } from "./interface/Command";
+import Command from "./interfaces/Command";
 
-export class CommandLoader {
+export default class CommandLoader {
 	// makes a list including all the commands
 
 	private commandList = [] as Command[];
