@@ -6,8 +6,8 @@ import QueueManager from "../queues/QueueManager";
 
 export default class Queue extends PublicCommand {
     invokeStr: string = "!queue";
-    description: string = "queue in a region.";
-    help: string = "!queue (details not worked out yet)";
+    description: string = "Join the queue for matchmaking. Has to be done in one of the queue channels.";
+    help: string = "!queue";
     category_name: string = "Queues";
 
     async action(msg: Message): Promise<void> {
