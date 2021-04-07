@@ -5,7 +5,7 @@ import BrawlApiWrapper from "../db/BrawlApiWrapper";
 
 export default class Link extends PublicCommand {
     invokeStr: string = "!link";
-    description: string = "lets me know what your brawlhalla account is";
+    description: string = "Link your Brawlhalla account to queue in ranked matches.";
     help: string = "!link \{your Brawlhalla ID\}";
 
     async action(msg: Message): Promise<void> {
