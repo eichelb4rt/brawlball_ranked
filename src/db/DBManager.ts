@@ -31,6 +31,6 @@ export default class DBManager {
 }
 
 export interface DBPlayer {
-    Name: string,
+    BrawlhallaID: string,
     Elo: number
 }

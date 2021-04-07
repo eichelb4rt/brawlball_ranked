@@ -7,7 +7,7 @@ import Team from "./Team";
 import { QueuedMatch } from "../matches/Match";
 
 export default class Player {
-    public readonly id: string; // discord id
+    public readonly id: string; // brawl id
     public readonly onEloChange: SubEvent<number>;  // emits whenever player elo changes
     public _queue: Queue | undefined;    // Queue that the player is searching for match in
     private _match: QueuedMatch | undefined;  // Match that the player is fighting in
@@ -37,7 +37,7 @@ export default class Player {
         const db = await DBManager.getInstance().db;
         for (let blueprint of Config.queues) {
             if (await DBManager.getInstance().existsTable(blueprint.dbname)) {
-                let elo_rows = await db.get(`SELECT * FROM ${blueprint.dbname} WHERE Name = ?`, [this.id]) as DBPlayer; // get entry from the db
+                let elo_rows = await db.get(`SELECT * FROM ${blueprint.dbname} WHERE BrawlhallaID = ?`, [this.id]) as DBPlayer; // get entry from the db
                 let db_elo = Config.eloOnStart  // initiate elo
                 if (elo_rows) {    // if there is an entry, read it
                     db_elo = elo_rows.Elo;
@@ -54,14 +54,14 @@ export default class Player {
         // make sure table name exists to prevent SQL Injections
         if (await dbManager.existsTable(queue.dbname)) {
             // search for player in queue db
-            let result = await db.get(`SELECT * FROM ${queue.dbname} WHERE Name = ?`, [this.id]) as DBPlayer;  // player.id is Discord ID
+            let result = await db.get(`SELECT * FROM ${queue.dbname} WHERE BrawlhallaID = ?`, [this.id]) as DBPlayer;  // player.id is Brawlhalla ID
             // check if they were found
             if (!result) {
                 // add player to db if they don't already exist
                 await db.run(`INSERT INTO ${queue.dbname} VALUES(?,?)`, [this.id, this.getEloInQueue(queue.blueprint)]);
             } else {
                 // update elo if they do already exist
-                await db.run(`UPDATE ${queue.dbname} SET Elo = ? WHERE Name = ?`, [this.getEloInQueue(queue.blueprint), this.id]);
+                await db.run(`UPDATE ${queue.dbname} SET Elo = ? WHERE BrawlhallaID = ?`, [this.getEloInQueue(queue.blueprint), this.id]);
             }
         }
     }
@@ -181,6 +181,14 @@ export default class Player {
             }
         }
         return Config.ranks[lowerBound].name;
+    }
+
+    public async getDiscordID(): Promise<string> {
+        const db = await DBManager.getInstance().db;
+        const discord_id_row = await db.get("SELECT * FROM Users WHERE BrawlhallaID = ?", [this.id]);
+        if (!discord_id_row)
+            throw new Error(`Player with Brawlhalla id ${this.id} not found.`);
+        return discord_id_row.DiscordID;
     }
 }
 

@@ -70,10 +70,10 @@ export default class Config {
 	];
 
 	static readonly queues: QueueBlueprint[] = [
-		{ dbname: "Solo2v2", displayName: "Solo 2v2", poolSystem: PoolSystem.Solo2v2 },
-		{ dbname: "Team2v2", displayName: "Team 2v2", poolSystem: PoolSystem.Team2v2 },
-		{ dbname: "Solo3v3", displayName: "Solo 3v3", poolSystem: PoolSystem.Solo3v3 },
-		{ dbname: "Team3v3", displayName: "Team 3v3", poolSystem: PoolSystem.Team3v3 }
+		{ dbname: "solo2v2", displayName: "Solo 2v2", poolSystem: PoolSystem.Solo2v2 },
+		{ dbname: "team2v2", displayName: "Team 2v2", poolSystem: PoolSystem.Team2v2 },
+		{ dbname: "solo3v3", displayName: "Solo 3v3", poolSystem: PoolSystem.Solo3v3 },
+		{ dbname: "team3v3", displayName: "Team 3v3", poolSystem: PoolSystem.Team3v3 }
 	];
 
 	static readonly poolDir = "queues";

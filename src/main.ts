@@ -10,7 +10,9 @@ client.once("ready", () => {
 });
 
 client.on("message", (message: Message) => {
-	commandLoader.getCommandList().forEach((command: Command) => command.onMessage(message));
+	commandLoader.getCommandList().forEach((command: Command) => {
+		if (command.enabled) command.onMessage(message);
+	});
 });
 
 client.login(KEYS.botToken);

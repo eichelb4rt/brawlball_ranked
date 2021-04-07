@@ -4,7 +4,8 @@ import Match, { QueuedMatch } from "../matches/Match";
 import Player from "../players/Player";
 import Pool from "./Pool";
 import Queue, { QueueBlueprint } from "./Queue";
-import Team from "../players/Team";
+import Team, { JoinConfig } from "../players/Team";
+import BrawlApiWrapper from "../db/BrawlApiWrapper";
 
 export default class QueueManager {
     // singleton
@@ -44,7 +45,16 @@ export default class QueueManager {
         }
     }
 
-    public addToQueue(poolname: string, region: string, team: Team) {
+    public async addToSoloQueue(poolname: string, region: string, player: Player) {
+        if (player.team) {
+            throw new Error(`You can't solo queue if you're already in a team.`);
+        }
+        const soloTeam = new Team();
+        soloTeam.join(player, JoinConfig.System);
+        return this.addToQueue(poolname, region, soloTeam);
+    }
+
+    public async addToQueue(poolname: string, region: string, team: Team) {
         let queue: Queue = this.queues[poolname][region];
         let pool: Pool = queue.pool;
 
@@ -60,14 +70,17 @@ export default class QueueManager {
             }
         }
         if (team.match) {   // Can't queue if in a match
-            throw new Error(`The team is already in a match.`)
+            throw new Error(`The team is already in a match.`);
         }
+        
         for (let player of team.players) {
             if (player.queue) { // if a player is already in a queue, we can't add the team
-                throw new Error(`Player ${player.id} is already in a queue!`);  // TODO: maybe players name instead?
+                let mention = `<@${await player.getDiscordID()}>`;
+                throw new Error(`${mention} is already in a queue.`);
             }
             if (player.match) { // if a player is already in a match, we can't add the team
-                throw new Error(`Player ${player.id} is already in a match!`);  // TODO: maybe players name instead?
+                let name = `<@${await player.getDiscordID()}>`;
+                throw new Error(`${name} is already in a match.`);
             }
         }
 
@@ -79,8 +92,19 @@ export default class QueueManager {
         }
     }
 
+    public abortSoloQueue(player: Player) {
+        if (!player.queue) {
+            throw new Error("You're not even in a queue!");
+        }
+        player.queue.pool.remove([player]);
+        player.queue = undefined;
+    }
+
     public abortQueue(team: Team) {
-        team.queue!.pool.remove(team.players);  // remove players from pool
+        if (!team.queue) {
+            throw new Error("You're not even in a queue!");
+        }
+        team.queue.pool.remove(team.players);  // remove players from pool
         team.queue = undefined; // unset team queue
         for (let player of team.players) {  // unset player queues
             player.queue = undefined;
