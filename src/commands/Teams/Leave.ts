@@ -1,14 +1,15 @@
 import { Message, MessageReaction, TextChannel, User } from "discord.js"
-import PublicCommand from "../interfaces/PublicCommand";
-import DBManager from "../db/DBManager";
-import PlayerCache from "../players/PlayerCache";
-import QueueManager from "../queues/QueueManager";
-import Team from "../players/Team";
+import PublicCommand from "../../interfaces/PublicCommand";
+import DBManager from "../../db/DBManager";
+import PlayerCache from "../../players/PlayerCache";
+import QueueManager from "../../queues/QueueManager";
+import Team from "../../players/Team";
 
 export default class Leave extends PublicCommand {
-    invokeStr: string = "!leave";
-    description: string = "Leave your team.";
-    help: string = "!leave";
+    name: string = "leave";
+    short_description: string = "Leave your team.";
+    long_description: string = "Leave your team";
+    usage: string = "!leave";
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;

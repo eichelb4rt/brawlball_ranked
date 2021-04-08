@@ -1,14 +1,15 @@
 import { Message, MessageReaction, TextChannel, User } from "discord.js"
-import PublicCommand from "../interfaces/PublicCommand";
-import DBManager from "../db/DBManager";
-import PlayerCache from "../players/PlayerCache";
-import QueueManager from "../queues/QueueManager";
-import Team from "../players/Team";
+import PublicCommand from "../../interfaces/PublicCommand";
+import DBManager from "../../db/DBManager";
+import PlayerCache from "../../players/PlayerCache";
+import QueueManager from "../../queues/QueueManager";
+import Team from "../../players/Team";
 
 export default class Invite extends PublicCommand {
-    invokeStr: string = "!invite";
-    description: string = "Invite players to your team.";
-    help: string = "!invite <mention>";
+    name: string = "invite";
+    short_description: string = "Invite players to your team.";
+    long_description: string = "Invite players to your team.";
+    usage: string = "!invite <mention>";
     readonly time_until_expired = 5 * 60 * 1000;
 
     async action(msg: Message): Promise<void> {

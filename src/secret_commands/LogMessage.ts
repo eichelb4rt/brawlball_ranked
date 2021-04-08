@@ -3,7 +3,7 @@ import SecretCommand from "../interfaces/SecretCommand";
 
 export default class LogMessage extends SecretCommand {
     
-    invokeStr = 'any';  // not actually used
+    name = 'any';  // not actually used
     enabled = false;
 
     // overrides onMessage

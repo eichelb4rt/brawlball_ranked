@@ -1,13 +1,14 @@
 import { Message, TextChannel } from "discord.js"
-import PublicCommand from "../interfaces/PublicCommand";
-import DBManager from "../db/DBManager";
-import PlayerCache from "../players/PlayerCache";
-import QueueManager from "../queues/QueueManager";
+import PublicCommand from "../../interfaces/PublicCommand";
+import DBManager from "../../db/DBManager";
+import PlayerCache from "../../players/PlayerCache";
+import QueueManager from "../../queues/QueueManager";
 
 export default class QueueCommand extends PublicCommand {
-    invokeStr: string = "!queue";
-    description: string = "Join the queue for matchmaking. Has to be done in one of the queue channels.";
-    help: string = "!queue";
+    name: string = "queue";
+    short_description: string = "Join the queue for matchmaking.";
+    long_description: string = "Join the queue for matchmaking. Has to be done in one of the queue channels.";
+    usage: string = "!queue";
     category_name: string = "Queues";
 
     async action(msg: Message): Promise<void> {

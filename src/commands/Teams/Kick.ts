@@ -1,14 +1,15 @@
 import { Message, MessageReaction, TextChannel, User } from "discord.js"
-import PublicCommand from "../interfaces/PublicCommand";
-import DBManager from "../db/DBManager";
-import PlayerCache from "../players/PlayerCache";
-import QueueManager from "../queues/QueueManager";
-import Team from "../players/Team";
+import PublicCommand from "../../interfaces/PublicCommand";
+import DBManager from "../../db/DBManager";
+import PlayerCache from "../../players/PlayerCache";
+import QueueManager from "../../queues/QueueManager";
+import Team from "../../players/Team";
 
 export default class Kick extends PublicCommand {
-    invokeStr: string = "!kick";
-    description: string = "Kick players from your team.";
-    help: string = "!kick <mention>";
+    name: string = "kick";
+    short_description: string = "Kick players from your team.";
+    long_description: string = "Kick player from your team. Only the host can kick people.";
+    usage: string = "!kick <mention>";
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;

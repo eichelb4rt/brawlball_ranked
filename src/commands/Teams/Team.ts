@@ -1,15 +1,16 @@
 import { Message, MessageEmbed, MessageReaction, TextChannel, User } from "discord.js"
-import PublicCommand from "../interfaces/PublicCommand";
-import DBManager from "../db/DBManager";
-import PlayerCache from "../players/PlayerCache";
-import QueueManager from "../queues/QueueManager";
-import Team from "../players/Team";
-import BrawlApiWrapper from "../db/BrawlApiWrapper";
+import PublicCommand from "../../interfaces/PublicCommand";
+import DBManager from "../../db/DBManager";
+import PlayerCache from "../../players/PlayerCache";
+import QueueManager from "../../queues/QueueManager";
+import Team from "../../players/Team";
+import BrawlApiWrapper from "../../db/BrawlApiWrapper";
 
 export default class TeamCommand extends PublicCommand {
-    invokeStr: string = "!team";
-    description: string = "Show the players of your team.";
-    help: string = "!team";
+    name: string = "team";
+    short_description: string = "Show the players in your team.";
+    long_description: string = "Show the players in your team. The host is underlined and thicc.";
+    usage: string = "!team";
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;

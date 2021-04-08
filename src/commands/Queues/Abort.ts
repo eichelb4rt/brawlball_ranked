@@ -1,13 +1,14 @@
 import { Message, TextChannel } from "discord.js"
-import PublicCommand from "../interfaces/PublicCommand";
-import DBManager from "../db/DBManager";
-import PlayerCache from "../players/PlayerCache";
-import QueueManager from "../queues/QueueManager";
+import PublicCommand from "../../interfaces/PublicCommand";
+import DBManager from "../../db/DBManager";
+import PlayerCache from "../../players/PlayerCache";
+import QueueManager from "../../queues/QueueManager";
 
 export default class Abort extends PublicCommand {
-    invokeStr: string = "!abort";
-    description: string = "Abort your queue.";
-    help: string = "!abort";
+    name: string = "abort";
+    short_description: string = "Abort your queue.";
+    long_description: string = "Abort your queue";
+    usage: string = "!abort";
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;

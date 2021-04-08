@@ -3,7 +3,7 @@ import SecretCommand from "../interfaces/SecretCommand";
 
 export default class Shutdown extends SecretCommand {
     
-    invokeStr = "!shutdown";
+    name = "shutdown";
 
     action(msg: Message): void {
         msg.channel.send("no.")

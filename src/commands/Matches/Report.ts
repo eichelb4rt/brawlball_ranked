@@ -1,12 +1,13 @@
 import { Message } from "discord.js"
-import DBManager from "../db/DBManager";
-import PublicCommand from "../interfaces/PublicCommand";
-import BrawlApiWrapper from "../db/BrawlApiWrapper";
+import DBManager from "../../db/DBManager";
+import PublicCommand from "../../interfaces/PublicCommand";
+import BrawlApiWrapper from "../../db/BrawlApiWrapper";
 
 export default class Link extends PublicCommand {
-    invokeStr: string = "!link";
-    description: string = "Link your Brawlhalla account to queue in ranked matches.";
-    help: string = "!link <your_brawlhalla_id>";
+    name: string = "link";
+    short_description: string = "Link your Brawlhalla account to queue in ranked matches.";
+    long_description: string = "Link your Brawlhalla account to queue in ranked matches.";
+    usage: string = "!link <your_brawlhalla_id>";
 
     async action(msg: Message): Promise<void> {
         const brawl_id: string = msg.content.split(/ +/)[1];    // separate by whitespace and take 2nd argument
