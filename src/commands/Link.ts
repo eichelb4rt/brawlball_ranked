@@ -6,7 +6,7 @@ import BrawlApiWrapper from "../db/BrawlApiWrapper";
 export default class Link extends PublicCommand {
     invokeStr: string = "!link";
     description: string = "Link your Brawlhalla account to queue in ranked matches.";
-    help: string = "!link \{your Brawlhalla ID\}";
+    help: string = "!link <your_brawlhalla_id>";
 
     async action(msg: Message): Promise<void> {
         const brawl_id: string = msg.content.split(/ +/)[1];    // separate by whitespace and take 2nd argument

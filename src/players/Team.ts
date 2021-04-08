@@ -6,12 +6,16 @@ import QueueManager from "../queues/QueueManager";
 export default class Team {
     // IDEA: divide into Team and PremadeTeam extends Team
     public players: Player[];
+    public host: Player | undefined;    // only the host can kick people and queue (i believe)
     private _queue: Queue | undefined;    // the team can be constructed whilst inside a specific queue.
     private _match: Match | undefined;
 
-    constructor(queue?: Queue) {
+    constructor(host?: Player) {
         this.players = [];
-        this.queue = queue;
+        this.host = host;
+        if (host) {
+            this.join(host, JoinConfig.Strong);
+        }
     }
 
     public averageElo(): number {
@@ -60,13 +64,20 @@ export default class Team {
     public kick(player: Player) {
         // if the team is in a queue, abort the queue
         let queueManager: QueueManager = QueueManager.getInstance();
-        queueManager.abortQueue(this);
+        if (this.queue)
+            queueManager.abortQueue(this);
         // now remove the player from the team
         const index = this.players.indexOf(player);
         if (index > -1) {
             this.players.splice(index, 1);
         }
         player.team = undefined
+        // maybe need to change the host
+        if (player == this.host) {
+            if (this.players.length > 0) {
+                this.host = this.players[0];
+            }
+        }
     }
 
     public set queue(queue: Queue | undefined) {    // does not include them actually joining the pool

@@ -28,6 +28,14 @@ export default class DBManager {
             return true;
         return false;
     }
+
+    public async discord_id_to_brawl_id(discord_id: string): Promise<string> {
+        const db = await this.db;
+        const brawlId_row = await db.get("SELECT * FROM Users WHERE DiscordID = ?", [discord_id]);
+        if (brawlId_row)
+            return brawlId_row.BrawlhallaID;
+        throw new Error(`There is no Brawlhalla account linked to <@${discord_id}>. To do that, type \`!link \{your Brawlhalla ID\}\``);
+    }
 }
 
 export interface DBPlayer {

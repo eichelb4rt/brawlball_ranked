@@ -4,7 +4,7 @@ import DBManager from "../db/DBManager";
 import PlayerCache from "../players/PlayerCache";
 import QueueManager from "../queues/QueueManager";
 
-export default class Queue extends PublicCommand {
+export default class QueueCommand extends PublicCommand {
     invokeStr: string = "!queue";
     description: string = "Join the queue for matchmaking. Has to be done in one of the queue channels.";
     help: string = "!queue";
@@ -27,19 +27,22 @@ export default class Queue extends PublicCommand {
         let pool = args[1] + args[2];
 
         // get the brawl id corresponding to the discord id
-        const db = await DBManager.getInstance().db;
-        const brawlId_row = await db.get("SELECT * FROM Users WHERE DiscordID = ?", [msg.author.id]);
-
-        if (!brawlId_row) {
-            channel.send("You don't have a Brawlhalla Account linked. To do that, type `!link \{your Brawlhalla ID\}`");
+        const db_manager = DBManager.getInstance();
+        let brawl_id: string
+        try {
+            brawl_id = await db_manager.discord_id_to_brawl_id(msg.author.id);
+        } catch (e) {
+            channel.send(e.message);
             return;
         }
 
+        // let the queuemanager handle the rest
         try {
-            await this.queue(brawlId_row.BrawlhallaID, pool, region);
+            await this.queue(brawl_id, pool, region);
             channel.send("Searching for players...");
         } catch (e) {
             channel.send(e.message);
+            return;
         }
     }
 
@@ -48,7 +51,11 @@ export default class Queue extends PublicCommand {
         const queueManager = QueueManager.getInstance();
         const player = playerCache.getPlayer(brawlId);
         if (player.team) {
-            return await queueManager.addToQueue(pool, region, player.team);
+            if (player.team.host == player) {
+                return await queueManager.addToQueue(pool, region, player.team);
+            } else {
+                throw new Error("Only the host can join a queue.");
+            }
         } else {
             return await queueManager.addToSoloQueue(pool, region, player);
         }
