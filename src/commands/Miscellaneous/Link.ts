@@ -15,9 +15,10 @@ export default class Link extends PublicCommand {
         const db = await DBManager.getInstance().db;
         
         // check if the given id even belongs to a user
+        const brawl_api_wrapper = BrawlApiWrapper.getInstance();
         let name: string;
         try {
-            name = await BrawlApiWrapper.getNameByID(brawl_id);
+            name = await brawl_api_wrapper.getNameByID(brawl_id);
         } catch (e) {
             msg.channel.send("This id does not belong to any Brawlhalla User.");
             return;

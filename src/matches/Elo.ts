@@ -26,6 +26,14 @@ export default class Elo {
             return y2;
         }
     }
+
+    public static score_string(score: Score): string {
+        switch(score) {
+            case Score.Win: return "W";
+            case Score.Loss: return "L";
+            case Score.Draw: return "tied";
+        }
+    }
 }
 
 export enum Score {

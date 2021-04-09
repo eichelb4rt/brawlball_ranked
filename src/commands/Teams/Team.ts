@@ -30,13 +30,14 @@ export default class TeamCommand extends PublicCommand {
         let team = player.team;
 
         // build the string holding the team members
+        const brawl_api_wrapper = BrawlApiWrapper.getInstance();
         let team_string = "";
         if (!team) {
-            team_string = await BrawlApiWrapper.getNameByID(player.id);
+            team_string = await brawl_api_wrapper.getNameByID(player.id);
         } else {
             for (let team_player of team.players) {
                 // append the name to the string
-                let name = await BrawlApiWrapper.getNameByID(team_player.id);
+                let name = await brawl_api_wrapper.getNameByID(team_player.id);
                 if (team_player == team.host)    // underline host
                     name = `__**${name}**__`;
                 team_string = team_string.concat(`${name}\n`);

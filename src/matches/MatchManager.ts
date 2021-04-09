@@ -39,13 +39,17 @@ export default class MatchManager {
         // remove player from the queue
         for (let player of match.players) {
             player.queue = undefined;
-            player.team!.queue = undefined;
+            if (player.team) {
+                player.team.queue = undefined;
+            }
         }
         // start the match
         this.ongoingMatches.push(match);
         for (let player of match.players) {
             player.match = match;
-            player.team!.match = match;
+            if (player.team) {
+                player.team.match = match;
+            }
         }
     }
 
