@@ -6,6 +6,7 @@ import PlayerCache from "../../players/PlayerCache";
 import Elo, { Score } from "../../matches/Elo";
 import Match, { Teams } from "../../matches/Match";
 import Player from "../../players/Player";
+import Config from "../../Config";
 
 export default class Link extends PublicCommand {
     readonly time_until_WL_expires = 1 * 60 * 1000; // first reaction: W or L
@@ -102,7 +103,7 @@ export default class Link extends PublicCommand {
         // build the confirming embed
         const result_offer_embed: MessageEmbed = new MessageEmbed()
             .setTitle("Match Results")
-            .setColor("#002154");
+            .setColor(Config.embed_colour);
         
         // add results of TeamA and TeamB
         const brawl_api_wrapper = BrawlApiWrapper.getInstance();

@@ -43,6 +43,6 @@ export default class Queue {
 
 export interface QueueBlueprint {
     dbname: string;
-    displayName?: string;
+    displayName: string;
     poolSystem: PoolSystem;
 }

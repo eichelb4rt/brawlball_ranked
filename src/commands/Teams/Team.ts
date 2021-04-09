@@ -5,6 +5,7 @@ import PlayerCache from "../../players/PlayerCache";
 import QueueManager from "../../queues/QueueManager";
 import Team from "../../players/Team";
 import BrawlApiWrapper from "../../db/BrawlApiWrapper";
+import Config from "../../Config";
 
 export default class TeamCommand extends PublicCommand {
     name: string = "team";
@@ -47,7 +48,7 @@ export default class TeamCommand extends PublicCommand {
         // build the message that shows the team members
         const team_embed: MessageEmbed = new MessageEmbed()
             .setTitle("Team Info")
-            .setColor("#002154")
+            .setColor(Config.embed_colour)
             .addField("players", team_string, false);
         channel.send(team_embed);
     }

@@ -29,7 +29,7 @@ export default class Help extends PublicCommand {
     general_help_embed(): MessageEmbed {
         const helpEmbed: MessageEmbed = new MessageEmbed()
             .setTitle("Commands")
-            .setColor("#002154")
+            .setColor(Config.embed_colour)
             .addField("Usage:", "Type `!help <command_name>` to show more detailed command usage.\n(e.g.: `!help kick`)", true);
         const categories = command_loader.getCategories();
         for (let category of categories) {
@@ -60,7 +60,8 @@ export default class Help extends PublicCommand {
         // create the man page
         const helpEmbed: MessageEmbed = new MessageEmbed()
             .setTitle("Command Help")
-            .setColor("#002154")
+            .setColor(Config.embed_colour)
+            .setDescription(`Help page for \`${command.name}\``)
             .addField("Description", command.long_description, false)
             .addField("Usage", command.usage, false);
         return helpEmbed;

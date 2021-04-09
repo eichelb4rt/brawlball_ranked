@@ -34,7 +34,6 @@ export default class Abort extends PublicCommand {
         const playerCache = PlayerCache.getInstance();
         const queueManager = QueueManager.getInstance();
         const player = playerCache.getPlayer(brawlId);
-        console.log(playerCache);
         if (player.team) {
             return queueManager.abortQueue(player.team);
         } else {

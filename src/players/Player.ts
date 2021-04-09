@@ -5,10 +5,12 @@ import Elo, { Score } from "../matches/Elo"
 import DBManager, { DBPlayer } from "../db/DBManager";
 import Team from "./Team";
 import { QueuedMatch } from "../matches/Match";
+import { client } from "../main";
+import { User } from "discord.js";
 
 export default class Player {
     public readonly id: string; // brawl id
-    public readonly onEloChange: SubEvent<number>;  // emits whenever player elo changes
+    public readonly onEloChange: SubEvent<EloChangeInfo>;  // emits whenever player elo changes
     public _queue: Queue | undefined;    // Queue that the player is searching for match in
     private _match: QueuedMatch | undefined;  // Match that the player is fighting in
     private _elo: Map<QueueBlueprint, number>;
@@ -19,7 +21,7 @@ export default class Player {
         this.id = id;
         this._elo = new Map();
         this._setup = false;
-        this.onEloChange = new SubEvent<number>();
+        this.onEloChange = new SubEvent<EloChangeInfo>();
         this.setup();
     }
 
@@ -27,8 +29,24 @@ export default class Player {
         // await player.setup() to use elo stuff
         // this can be "locked" this way because js is event-loop concurrent
         if (!this._setup) {
-            await this.readEloFromDB()
+            await this.readEloFromDB();
             this._setup = true
+        }
+    }
+
+    public async notify(msg_content: any) {
+        // get the discord user for this player
+        const db_manager = DBManager.getInstance();
+        const discord_id = await db_manager.brawl_id_to_discord_id(this.id);
+        const user: User | undefined = client.users.cache.get(discord_id);
+        if (!user) {
+            throw new Error('I do not exist. Nothing exists. We live in the matrix.');
+        }
+        // send a message
+        try {
+            await user.send(msg_content);
+        } catch (e) {
+            console.log(e);
         }
     }
 
@@ -102,7 +120,13 @@ export default class Player {
                 oldElo = Config.eloOnStart;
             this._elo.set(queue.blueprint, elo);
             this.updateEloInDB(queue);
-            this.onEloChange.emit(elo - oldElo);
+            const elo_change_info: EloChangeInfo = {
+                queue_name: queue.blueprint.displayName,
+                old_elo: oldElo,
+                new_elo: elo,
+                elo_diff: elo - oldElo,
+            }
+            this.onEloChange.emit(elo_change_info);
         }
     }
 
@@ -156,31 +180,8 @@ export default class Player {
     }
 
     public getRank(blueprint: QueueBlueprint): string {
-        // (kind of) binary search to get the rank for a given player elo
         const elo = this.getEloInQueue(blueprint);
-        // initate l and r
-        let lowerBound: number = 0;
-        let upperBound: number = Config.ranks.length - 1;
-        // check the boundaries
-        if (elo < Config.ranks[lowerBound].start)
-            return Config.ranks[lowerBound].name;
-        if (elo > Config.ranks[upperBound].start)
-            return Config.ranks[upperBound].name;
-        // loop until we have a nice tight interval
-        while (upperBound - lowerBound > 1) {
-            let mid: number = Math.floor((lowerBound + upperBound) / 2);
-            if (elo < Config.ranks[mid].start) {
-                // mid can be new upper bound
-                upperBound = mid;
-            } else if (elo > Config.ranks[mid].start) {
-                // mid can be new lower bound
-                lowerBound = mid;
-            } else {
-                // exactly found our elo
-                return Config.ranks[mid].name;
-            }
-        }
-        return Config.ranks[lowerBound].name;
+        return Elo.elo_to_rank(elo);
     }
 
     public async getDiscordID(): Promise<string> {
@@ -195,4 +196,11 @@ export default class Player {
 export interface Rank {
     name: string;
     start: number;
+}
+
+export interface EloChangeInfo {
+    queue_name: string;
+    old_elo: number;
+    new_elo: number;
+    elo_diff: number;
 }
