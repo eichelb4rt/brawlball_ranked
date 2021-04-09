@@ -13,13 +13,13 @@ export default class Player {
     public readonly onEloChange: SubEvent<EloChangeInfo>;  // emits whenever player elo changes
     public _queue: Queue | undefined;    // Queue that the player is searching for match in
     private _match: QueuedMatch | undefined;  // Match that the player is fighting in
-    private _elo: Map<QueueBlueprint, number>;
+    public elo_map: Map<QueueBlueprint, number>;
     public team: Team | undefined;
     private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
 
     constructor(id: string) {
         this.id = id;
-        this._elo = new Map();
+        this.elo_map = new Map();
         this._setup = false;
         this.onEloChange = new SubEvent<EloChangeInfo>();
         this.setup();
@@ -60,7 +60,7 @@ export default class Player {
                 if (elo_rows) {    // if there is an entry, read it
                     db_elo = elo_rows.Elo;
                 }
-                this._elo.set(blueprint, db_elo);
+                this.elo_map.set(blueprint, db_elo);
             }
         }
     }
@@ -86,7 +86,7 @@ export default class Player {
 
     public getEloInQueue(queue: QueueBlueprint): number {
         // figure out in which queue we want to set the elo
-        const elo = this._elo.get(queue);
+        const elo = this.elo_map.get(queue);
         if (elo)
             return elo;
         return Config.eloOnStart;
@@ -115,10 +115,10 @@ export default class Player {
         }
         // set the elo
         if (queue) {
-            let oldElo = this._elo.get(queue.blueprint);
+            let oldElo = this.elo_map.get(queue.blueprint);
             if (!oldElo)
                 oldElo = Config.eloOnStart;
-            this._elo.set(queue.blueprint, elo);
+            this.elo_map.set(queue.blueprint, elo);
             this.updateEloInDB(queue);
             const elo_change_info: EloChangeInfo = {
                 queue_name: queue.blueprint.displayName,
@@ -164,7 +164,7 @@ export default class Player {
 
     public toString(): string {
         let to_string = `${this.id}:`;
-        for (let blueprint of this._elo.keys()) {
+        for (let blueprint of this.elo_map.keys()) {
             to_string = to_string.concat(`\t${blueprint.displayName}:\t${this.getEloInQueue(blueprint)} (${this.getRank(blueprint)})`);
         }
         return to_string;

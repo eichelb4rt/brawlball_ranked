@@ -28,15 +28,15 @@ export default class PlayerCache {
         let player: Player | undefined = this.cache.get(id)
         if (!player) {   // if not, make a new player with the id and cache it
             player = new Player(id);
-            this.cache.set(id, player)
+            this.cache.set(id, player);
+            player.onEloChange.subscribe(async info => {
+                try {
+                    await player!.notify(this.onEloChangeEmbed(info));
+                } catch (e) {
+                    // if we can't notify them because they're not cached, that's ok.
+                }
+            });
         }
-        player.onEloChange.subscribe(info => {
-            try {
-                player!.notify(this.onEloChangeEmbed(info));
-            } catch (e) {
-                // if we can't notify them because they're not cached, that's ok.
-            }
-        });
         return player
     }
 

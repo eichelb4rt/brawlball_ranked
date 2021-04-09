@@ -62,10 +62,7 @@ export class MyCache<T, K> {
         // add it if it's new
         let cached_value: CachedValue<K>
         if (!this.values.has(key)) {
-            const value: K = await this.refresh_function(key);
-            cached_value = new CachedValue(value);
-            this.values.set(key, cached_value);
-            return value;
+            return this.refresh(key);
         }
 
         // not new - check if it's age has expired the replace time
@@ -76,5 +73,12 @@ export class MyCache<T, K> {
             this.values.set(key, cached_value);
         }
         return cached_value.value;
+    }
+
+    public async refresh(key: T): Promise<K> {
+        const value: K = await this.refresh_function(key);
+        const cached_value = new CachedValue(value);
+        this.values.set(key, cached_value);
+        return value;
     }
 }

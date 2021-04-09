@@ -10,11 +10,11 @@ import Config from "../../Config";
 
 export default class Link extends PublicCommand {
     readonly time_until_WL_expires = 1 * 60 * 1000; // first reaction: W or L
-    readonly time_until_auto_confirm = 10 * 60 * 1000;  // enemies confirmation of W or L
+    readonly time_until_auto_confirm = 5 * 1000;  // enemies confirmation of W or L
 
     name: string = "report";
     short_description: string = "Report the result of your ranked match.";
-    long_description: string = `Report whether your **W**on or **L**ost your ranked match. The result can also be a **tie**. A player of the enemy team has to confirm the result. It will automatically be confirmed after ${this.time_until_auto_confirm / (60 * 1000)} minutes.`;
+    long_description: string = `Report whether your **W**on or **L**ost your ranked match. The result can also be a **tie**. A player of the enemy team has to confirm the result. It will automatically be confirmed after ${(this.time_until_auto_confirm / (60 * 1000)).toFixed(2)} minutes.`;
     usage: string = "!report";
 
     async action(msg: Message): Promise<void> {
@@ -44,7 +44,7 @@ export default class Link extends PublicCommand {
         // ask for the reported result
         let score: Score;
         try {
-            score = await this.ask_result(msg);
+            score = await this.get_result(msg);
         } catch (e) {
             channel.send(e.message);
             return;
@@ -62,7 +62,24 @@ export default class Link extends PublicCommand {
         }
     }
 
-    private async ask_result(msg: Message): Promise<Score> {
+    private async get_result(msg: Message): Promise<Score> {
+        // first check if result is given as an argument
+        const strings_for_win = ['W', 'Win'];
+        const strings_for_draw = ['D', 'Draw', 'Tie'];
+        const strings_for_loss = ['L', 'Loss', 'fuck'];
+
+        const args = msg.content.split(/ +/);
+        if (args.length > 1) {
+            const arg_score = args[1].toLowerCase();
+            if (strings_for_win.map(str => str.toLowerCase()).includes(arg_score)) {
+                return Score.Win;
+            } else if (strings_for_draw.map(str => str.toLowerCase()).includes(arg_score)) {
+                return Score.Draw;
+            } else if (strings_for_loss.map(str => str.toLowerCase()).includes(arg_score)) {
+                return Score.Loss;
+            }
+        }
+
         // react to the message, offering option win and loss
         const win_emoji = '🇼';
         const tie_emoji = '👔';
@@ -159,7 +176,7 @@ export default class Link extends PublicCommand {
         } else if (first_reaction?.emoji.name == deny_emoji) {   // user reported tie
             return false;
         } else {    // listener did not find reactions in the given time (time_until_WL_expires)
-            channel.send(`Result was automatically confirmed after ${this.time_until_auto_confirm / (60 * 1000)} minutes.`);
+            channel.send(`Result was automatically confirmed after ${(this.time_until_auto_confirm / (60 * 1000)).toFixed(2)} minutes.`);
             return true;
         }
     }
