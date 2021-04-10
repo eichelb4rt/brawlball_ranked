@@ -1,11 +1,11 @@
-import { Message, MessageEmbed, MessageReaction, Role, TextChannel, User } from "discord.js"
+import { Message, MessageEmbed, MessageReaction, TextChannel, User } from "discord.js"
 import DBManager from "../../db/DBManager";
 import PublicCommand from "../../interfaces/PublicCommand";
 import BrawlApiWrapper from "../../db/BrawlApiWrapper";
 import PlayerCache from "../../players/PlayerCache";
 import Elo, { Score } from "../../matches/Elo";
 import Match, { Teams } from "../../matches/Match";
-import Player, { Roles } from "../../players/Player";
+import Player, { Role } from "../../players/Player";
 import Config from "../../Config";
 
 export default class Link extends PublicCommand {
@@ -30,7 +30,7 @@ export default class Link extends PublicCommand {
         }
 
         // get the roles they want to have
-        let chosen_roles: Roles[];
+        let chosen_roles: Role[];
         try {
             chosen_roles = await this.get_roles(msg);
         } catch (e) {
@@ -51,62 +51,35 @@ export default class Link extends PublicCommand {
         // confirm that they set the roles they wanted to set
         let roles_str = "";
         for (let role of chosen_roles) {
-            roles_str = roles_str.concat(`${role} `);
+            roles_str = roles_str.concat(`${role.display_name} `);
         }
         channel.send(`You have chosen these roles: ${roles_str}`);
 
     }
 
-    private async get_roles(msg: Message): Promise<Roles[]> {
-        let chosen_roles: Roles[] = [];
+    private async get_roles(msg: Message): Promise<Role[]> {
+        let chosen_roles: Role[] = [];
 
         // first check if roles are given as arguments
-        const roles_to_strings: Map<Roles, string[]> = new Map([
-            [Roles.Runner, ['R', 'Run', 'Runner']],
-            [Roles.Support, ['S', 'Sup', 'Support', 'Supporter']],
-            [Roles.Defense, ['D', 'Def', 'Defense', 'Defence', 'defend']]
-        ]);
 
         const args = msg.content.split(/ +/).slice(1).map(str => str.toLowerCase());
         if (args.length > 0) {
             // check if there are args that do no resemble roles
-            let possible_role_strs: string[] = [];
-            for (const str_array of roles_to_strings.values()) {
-                possible_role_strs = possible_role_strs.concat(str_array.map(str => str.toLowerCase()));
-            }
             for (const arg of args) {
-                if (!possible_role_strs.includes(arg)) {
-                    throw new Error(`There is no role called \`${arg}\``);
+                const role = this.get_role_by_arg(arg);
+                if (!role) {
+                    throw new Error(`The role \`${arg}\` does not exist.`);
                 }
-            }
-
-            // now search in the args for roles
-            for (const role of roles_to_strings.keys()) {
-                const role_strs = roles_to_strings.get(role);
-                for (const role_str of role_strs!.map(str => str.toLowerCase())) {
-                    if (args.includes(role_str)) {
-                        chosen_roles.push(role);
-                        break;  // we found the role, we will break
-                    }
-                }
+                chosen_roles.push(role);
             }
             return chosen_roles;
         }
 
         // react to the message, offering option win and loss
-        const run_emoji = '🏃';
-        const sup_emoji = '⚔️';
-        const def_emoji = '🛡️';
-        const choices = [run_emoji, sup_emoji, def_emoji];
+        const choices = Config.roles.map(role => role.emoji);
         for (let choice of choices) {
             await msg.react(choice);
         }
-
-        const emoji_to_role: Map<string, Roles> = new Map([
-            [run_emoji, Roles.Runner],
-            [sup_emoji, Roles.Support],
-            [def_emoji, Roles.Defense]
-        ]);
 
         const filter = (reaction: MessageReaction, user: User) => {
             return choices.includes(reaction.emoji.name) && user.id === msg.author.id;
@@ -115,11 +88,30 @@ export default class Link extends PublicCommand {
         const collection = await msg.awaitReactions(filter, { max: choices.length, dispose: true, time: this.time_unti_message_deleted });
         const reaction_emojis = collection.map(reaction => reaction.emoji.name);
         for (const reaction_emoji of reaction_emojis) {
-            chosen_roles.push(emoji_to_role.get(reaction_emoji)!);
+            chosen_roles.push(this.get_role_by_emoji(reaction_emoji)!);
         }
 
         // role selection ended
         msg.delete({reason: "Role selection ended."});
         return chosen_roles;
+    }
+
+    private get_role_by_arg(arg: string): Role | undefined {
+        for (const role of Config.roles) {
+            const acceptable_names = role.acceptable_names.map(str => str.toLowerCase());
+            if (acceptable_names.includes(arg.toLowerCase())) {
+                return role;
+            }
+        }
+        return undefined;
+    }
+
+    private get_role_by_emoji(emoji: string): Role | undefined {
+        for (const role of Config.roles) {
+            if (role.emoji === emoji) {
+                return role;
+            }
+        }
+        return undefined;
     }
 }

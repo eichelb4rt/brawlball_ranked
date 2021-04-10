@@ -1,4 +1,4 @@
-import { Rank } from "./players/Player";
+import { Rank, Role } from "./players/Player";
 import { PoolSystem } from "./queues/Pool";
 import { QueueBlueprint } from "./queues/Queue";
 
@@ -78,6 +78,31 @@ export default class Config {
 
 	static readonly poolDir = "queues";
 	static readonly poolImplementationsDir = "pool_implementations";
+
+	////////////////////////////////////////////////////////////////
+	// Roles
+	////////////////////////////////////////////////////////////////
+
+	static readonly roles: Role[] = [
+		{
+			db_name: "run", 
+			display_name: "Runner", 
+			emoji: '🏃', 
+			acceptable_names: ['R', 'Run', 'Runner']
+		},
+		{
+			db_name: "sup", 
+			display_name: "Support", 
+			emoji: '⚔️', 
+			acceptable_names: ['S', 'Sup', 'Support', 'Supporter']
+		},
+		{
+			db_name: "def", 
+			display_name: "Defense", 
+			emoji: '🛡️', 
+			acceptable_names: ['D', 'Def', 'Defense', 'Defence', 'Defend']
+		}
+	]
 
 	////////////////////////////////////////////////////////////////
 	// Discord Config stuff

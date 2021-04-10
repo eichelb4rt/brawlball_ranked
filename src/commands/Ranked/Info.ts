@@ -44,7 +44,7 @@ export default class Info extends PublicCommand {
         // get the role
         let roles_str = "";
         for (let role of player.roles) {
-            roles_str = roles_str.concat(`${role}\n`);
+            roles_str = roles_str.concat(`${role.display_name} ${role.emoji}\n`);
         }
         if (player.roles.length === 0) {
             roles_str = "none";

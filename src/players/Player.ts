@@ -14,7 +14,7 @@ export default class Player {
     public _queue: Queue | undefined;    // Queue that the player is searching for match in
     private _match: QueuedMatch | undefined;  // Match that the player is fighting in
     public elo_map: Map<QueueBlueprint, number>;
-    public _roles: Roles[];
+    public _roles: Role[];
     public team: Team | undefined;
     private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
 
@@ -55,12 +55,19 @@ export default class Player {
 
     private async readRolesFromDB() {
         // gets the preferred roles form the db
+        let roles = [];
         const db_manager = DBManager.getInstance();
         const db = await db_manager.db;
         const rows = await db.all(`SELECT * FROM Roles WHERE BrawlhallaID = ?`, [this.id]); // get entries from the db
         for (let row of rows) {
-            this._roles.push(row.Role);
+            // find role corresponding to dbname
+            for (const role of Config.roles) {
+                if (role.db_name === row.Role) {
+                    roles.push(role);
+                }
+            }
         }
+        this._roles = roles;
     }
 
     private async updateRolesInDB() {
@@ -69,7 +76,7 @@ export default class Player {
         const db = await db_manager.db;
         await db.run("DELETE FROM Roles WHERE BrawlhallaID = ?", [this.id]);
         for (const role of this.roles) {
-            db.run("INSERT INTO Roles VALUES(?, ?)", [this.id, role]);
+            db.run("INSERT INTO Roles VALUES(?, ?)", [this.id, role.db_name]);
         }
     }
 
@@ -118,11 +125,11 @@ export default class Player {
         return Config.eloOnStart;
     }
 
-    public get roles(): Roles[] {
+    public get roles(): Role[] {
         return this._roles;
     }
 
-    public set roles(roles: Roles[]) {
+    public set roles(roles: Role[]) {
         this._roles = roles;
         this.updateRolesInDB();
     }
@@ -240,8 +247,9 @@ export interface EloChangeInfo {
     elo_diff: number;
 }
 
-export enum Roles {
-    Runner = "Runner",
-    Support = "Support",
-    Defense = "Defense"
+export interface Role {
+    db_name: string;
+    display_name: string;
+    emoji: string;
+    acceptable_names: string[];
 }
