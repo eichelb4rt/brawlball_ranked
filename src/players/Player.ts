@@ -14,12 +14,14 @@ export default class Player {
     public _queue: Queue | undefined;    // Queue that the player is searching for match in
     private _match: QueuedMatch | undefined;  // Match that the player is fighting in
     public elo_map: Map<QueueBlueprint, number>;
+    public _roles: Roles[];
     public team: Team | undefined;
     private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
 
     constructor(id: string) {
         this.id = id;
         this.elo_map = new Map();
+        this._roles = [];
         this._setup = false;
         this.onEloChange = new SubEvent<EloChangeInfo>();
         this.setup();
@@ -29,6 +31,7 @@ export default class Player {
         // await player.setup() to use elo stuff
         // this can be "locked" this way because js is event-loop concurrent
         if (!this._setup) {
+            await this.readRolesFromDB();
             await this.readEloFromDB();
             this._setup = true
         }
@@ -50,11 +53,32 @@ export default class Player {
         }
     }
 
-    public async readEloFromDB() {
+    private async readRolesFromDB() {
+        // gets the preferred roles form the db
+        const db_manager = DBManager.getInstance();
+        const db = await db_manager.db;
+        const rows = await db.all(`SELECT * FROM Roles WHERE BrawlhallaID = ?`, [this.id]); // get entries from the db
+        for (let row of rows) {
+            this._roles.push(row.Role);
+        }
+    }
+
+    private async updateRolesInDB() {
+        // updates roles in the db
+        const db_manager = DBManager.getInstance();
+        const db = await db_manager.db;
+        await db.run("DELETE FROM Roles WHERE BrawlhallaID = ?", [this.id]);
+        for (const role of this.roles) {
+            db.run("INSERT INTO Roles VALUES(?, ?)", [this.id, role]);
+        }
+    }
+
+    private async readEloFromDB() {
         // gets a map of the elo for all the pools from the db
-        const db = await DBManager.getInstance().db;
+        const db_manager = DBManager.getInstance();
+        const db = await db_manager.db;
         for (let blueprint of Config.queues) {
-            if (await DBManager.getInstance().existsTable(blueprint.dbname)) {
+            if (await db_manager.existsTable(blueprint.dbname)) {
                 let elo_rows = await db.get(`SELECT * FROM ${blueprint.dbname} WHERE BrawlhallaID = ?`, [this.id]) as DBPlayer; // get entry from the db
                 let db_elo = Config.eloOnStart  // initiate elo
                 if (elo_rows) {    // if there is an entry, read it
@@ -92,6 +116,15 @@ export default class Player {
         if (elo)
             return elo;
         return Config.eloOnStart;
+    }
+
+    public get roles(): Roles[] {
+        return this._roles;
+    }
+
+    public set roles(roles: Roles[]) {
+        this._roles = roles;
+        this.updateRolesInDB();
     }
 
     public get elo(): number {
@@ -205,4 +238,10 @@ export interface EloChangeInfo {
     old_elo: number;
     new_elo: number;
     elo_diff: number;
+}
+
+export enum Roles {
+    Runner = "Runner",
+    Support = "Support",
+    Defense = "Defense"
 }

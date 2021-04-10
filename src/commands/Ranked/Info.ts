@@ -42,7 +42,13 @@ export default class Info extends PublicCommand {
         await player.setup();   // before we do anything with the elo, we need to wait for the setup
 
         // get the role
-        const role = 'not implemented yet';
+        let roles_str = "";
+        for (let role of player.roles) {
+            roles_str = roles_str.concat(`${role}\n`);
+        }
+        if (player.roles.length === 0) {
+            roles_str = "none";
+        }
 
         // start building embed
         const embed: MessageEmbed = new MessageEmbed()
@@ -50,15 +56,22 @@ export default class Info extends PublicCommand {
             .setColor(Config.embed_colour)
             .addField("Brawlhalla Name", brawl_name, true)
             .addField("Discord Name", discord_name, true)
-            .addField('Preferred Role', role, true);
+            .addField('Preferred Role', roles_str, true);
         
-        // add the ranks
-        for (let blueprint of player.elo_map.keys()) {
+        // add the ranks where the player is actually ranked in
+        let has_rank: boolean = false;  // determine if the player is actually ranked in anywhere
+        const pools = player.elo_map.keys();
+        for (let blueprint of pools) {
             const elo = player.getEloInQueue(blueprint);
             const rank = player.getRank(blueprint);
             if (elo != Config.eloOnStart) {
+                has_rank = true;
                 embed.addField(blueprint.displayName, `${elo} (${rank})`, true);
             }
+        }
+        // say that they're not ranked in if there aren't any
+        if (!has_rank) {
+            embed.addField('Rank', 'You have not played ranked yet.', true);
         }
         channel.send(embed);
     }
