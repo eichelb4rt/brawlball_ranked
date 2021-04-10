@@ -39,6 +39,7 @@ export default class Info extends PublicCommand {
         // get the player
         const player_cache = PlayerCache.getInstance();
         const player = player_cache.getPlayer(brawl_id);
+        await player.setup();   // before we do anything with the elo, we need to wait for the setup
 
         // get the role
         const role = 'not implemented yet';
@@ -53,7 +54,11 @@ export default class Info extends PublicCommand {
         
         // add the ranks
         for (let blueprint of player.elo_map.keys()) {
-            embed.addField(blueprint.displayName, `${player.getEloInQueue(blueprint)} (${player.getRank(blueprint)})`);
+            const elo = player.getEloInQueue(blueprint);
+            const rank = player.getRank(blueprint);
+            if (elo != Config.eloOnStart) {
+                embed.addField(blueprint.displayName, `${elo} (${rank})`, true);
+            }
         }
         channel.send(embed);
     }
