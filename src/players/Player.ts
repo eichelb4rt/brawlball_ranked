@@ -81,6 +81,8 @@ export default class Player {
                 // update elo if they do already exist
                 await db.run(`UPDATE ${queue.dbname} SET Elo = ? WHERE BrawlhallaID = ?`, [this.getEloInQueue(queue.blueprint), this.id]);
             }
+        } else {
+            throw new Error("This queue does not exist");
         }
     }
 

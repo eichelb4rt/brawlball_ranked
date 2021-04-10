@@ -14,7 +14,12 @@ export default class Match {
         this.players = teamA.players.concat(teamB.players);
     }
 
-    public report(winner: Teams) {
+    public async report(winner: Teams) {
+        // we want to wait for the players to be setup before we change their elo
+        for (let player of this.players) {
+            await player.setup();
+        }
+
         // determine the actual scores
         let scoreA: Score = this.winnerToScore(this.teamA.players[0], winner);
         let scoreB: Score = this.winnerToScore(this.teamB.players[0], winner);

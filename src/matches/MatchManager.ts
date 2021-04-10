@@ -9,10 +9,8 @@ import BrawlApiWrapper from "../db/BrawlApiWrapper";
 export default class MatchManager {
     // manages matches and reports results to db
     private static instance: MatchManager;
-    public ongoingMatches: QueuedMatch[];
 
     private constructor() {
-        this.ongoingMatches = [];
         const queueManager: QueueManager = QueueManager.getInstance();
         queueManager.onMatchFound.subscribe(async (queuedMatch) => {
             this.startMatch(queuedMatch);   // start the match
@@ -65,13 +63,6 @@ export default class MatchManager {
         return MatchManager.instance;
     }
 
-    private removeMatch(match: QueuedMatch) {
-        const index = this.ongoingMatches.indexOf(match);
-        if (index > -1) {
-            this.ongoingMatches.splice(index, 1);
-        }
-    }
-
     public startMatch(match: QueuedMatch) {
         // check if the match can legitimately be started without problems
         for (let player of match.players) {
@@ -87,7 +78,6 @@ export default class MatchManager {
             }
         }
         // start the match
-        this.ongoingMatches.push(match);
         for (let player of match.players) {
             player.match = match;
             if (player.team) {
@@ -96,16 +86,14 @@ export default class MatchManager {
         }
     }
 
-    public report(player_reporting: Player, score: Score) {
+    public async report(player_reporting: Player, score: Score) {
         // a player reports a match on Discord
         const match = player_reporting.match;
         if (!match) {
             throw new Error("Player not in a Match!");
         }
         const winner = match.scoreToWinner(player_reporting, score);
-        match.report(winner);
-        // remove it from ongoing matches
-        this.removeMatch(match);
+        await match.report(winner);
         // the match is over, links can be deleted
         for (let player of match.players) {
             player.match = undefined;
