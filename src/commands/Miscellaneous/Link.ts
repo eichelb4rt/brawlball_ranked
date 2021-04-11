@@ -6,7 +6,7 @@ import BrawlApiWrapper from "../../db/BrawlApiWrapper";
 export default class Link extends PublicCommand {
     name: string = "link";
     short_description: string = "Link your Brawlhalla account to queue in ranked matches.";
-    long_description: string = "Link your Brawlhalla account to queue in ranked matches";
+    long_description: string = "Link your Brawlhalla account to queue in ranked matches. You can find your Brawlhalla ID when you start up Brawlhalla and look into your inventory.";
     usage: string = "!link <your_brawlhalla_id>";
 
     async action(msg: Message): Promise<void> {
