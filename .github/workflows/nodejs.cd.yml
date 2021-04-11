@@ -8,13 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait on tests
-        uses: lewagon/wait-on-check-action@v0.2
-        with:
-          ref: master
-          check-name: build
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
       - name: Deploy NodeJS app
         uses: appleboy/ssh-action@v0.1.2
         with:
