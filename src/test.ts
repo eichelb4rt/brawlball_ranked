@@ -1,3 +1,4 @@
+import { assert } from "console";
 import FS from "fs";
 import Path from "path";
 import UPath from "upath";
@@ -15,6 +16,7 @@ async function run_tests() {
         if (result) ++passed_count;
     }
     console.log(`\nEnd Result: ${passed_count}/${test_count} passed.`);
+    assert(test_count == passed_count);
 }
 
 function getTests(dir: string): Test[] {

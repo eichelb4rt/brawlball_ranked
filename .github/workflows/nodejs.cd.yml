@@ -1,0 +1,31 @@
+name: Deploy Node.js Application
+ 
+on:
+  push:
+    branches: [ $default-branch ]
+ 
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait on tests
+        uses: lewagon/wait-on-check-action@v0.2
+        with:
+          ref: $default-branch
+          check-name: build
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 20
+      - name: Deploy NodeJS app
+        uses: appleboy/ssh-action@v0.1.2
+        with:
+          host: ${{secrets.SSH_HOST}}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            BRAWLHALLA_API_TOKEN=${{ secrets.BRAWLHALLA_API_TOKEN }}
+            DISCORD_API_TOKEN=${{ secrets.DISCORD_API_TOKEN }}
+            cd brawlball_ranked
+            git pull
+            npm install
+            npm run build --if-present
+            screen -md -S 'brawlball_ranked' npm start
