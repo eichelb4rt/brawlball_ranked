@@ -7,7 +7,7 @@
 - suggested: Visual Studio Code with ESLint-extension
 - clone repository
 - `npm install`
-- insert `src/keys.ts` (template: `src/keys-template.ts`)
+- insert `.env` (template: `.env-template`)
 - `npm run build`
 - `npm start`
 
