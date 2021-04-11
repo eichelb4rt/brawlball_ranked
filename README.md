@@ -1,5 +1,7 @@
 # Brawlball Ranked Bot
 
+[![Node.js CI](https://github.com/eichelb4rt/brawlball_ranked/actions/workflows/nodejs.ci.yml/badge.svg)](https://github.com/eichelb4rt/brawlball_ranked/actions/workflows/nodejs.ci.yml)
+
 ## Installation
 - requires Node.js >=14
 - suggested: Visual Studio Code with ESLint-extension
