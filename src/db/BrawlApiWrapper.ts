@@ -1,6 +1,5 @@
 import Axios from "axios"
 import Config from "../Config";
-import Tokens from "../keys"
 
 export default class BrawlApiWrapper {
     private static instance: BrawlApiWrapper;
@@ -23,7 +22,7 @@ export default class BrawlApiWrapper {
     private async ask_brawl_for_id(brawlid: string): Promise<string> {
         return await Axios.get(`${Config.BrawlAPI}/player/${brawlid}/stats`, {
             params: {
-                api_key: Tokens.brawlhalla,
+                api_key: Config.BRAWLHALLA_API_TOKEN,
             }
         }).then((res) => {
             return res.data.name;

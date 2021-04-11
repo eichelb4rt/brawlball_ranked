@@ -1,6 +1,8 @@
 import { Rank, Role } from "./players/Player";
 import { PoolSystem } from "./queues/Pool";
 import { QueueBlueprint } from "./queues/Queue";
+import dotenv from "dotenv";
+dotenv.config();
 
 export default class Config {
 	////////////////////////////////////////////////////////////////
@@ -8,6 +10,8 @@ export default class Config {
 	////////////////////////////////////////////////////////////////
 
 	static readonly BrawlAPI = "https://api.brawlhalla.com";
+	static readonly BRAWLHALLA_API_TOKEN = process.env.BRAWLHALLA_API_TOKEN;
+	static readonly DISCORD_API_TOKEN = process.env.DISCORD_API_TOKEN;
 
 	////////////////////////////////////////////////////////////////
 	// Elo & Ranks
