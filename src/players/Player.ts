@@ -5,21 +5,25 @@ import Elo, { Score } from "../matches/Elo"
 import DBManager, { DBPlayer } from "../db/DBManager";
 import Team from "./Team";
 import { QueuedMatch } from "../matches/Match";
+import { client } from "../main";
+import { User } from "discord.js";
 
 export default class Player {
-    public readonly id: string; // discord id
-    public readonly onEloChange: SubEvent<number>;  // emits whenever player elo changes
+    public readonly id: string; // brawl id
+    public readonly onEloChange: SubEvent<EloChangeInfo>;  // emits whenever player elo changes
     public _queue: Queue | undefined;    // Queue that the player is searching for match in
     private _match: QueuedMatch | undefined;  // Match that the player is fighting in
-    private _elo: Map<QueueBlueprint, number>;
+    public elo_map: Map<QueueBlueprint, number>;
+    public _roles: Role[];
     public team: Team | undefined;
     private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
 
     constructor(id: string) {
         this.id = id;
-        this._elo = new Map();
+        this.elo_map = new Map();
+        this._roles = [];
         this._setup = false;
-        this.onEloChange = new SubEvent<number>();
+        this.onEloChange = new SubEvent<EloChangeInfo>();
         this.setup();
     }
 
@@ -27,22 +31,67 @@ export default class Player {
         // await player.setup() to use elo stuff
         // this can be "locked" this way because js is event-loop concurrent
         if (!this._setup) {
-            await this.readEloFromDB()
+            await this.readRolesFromDB();
+            await this.readEloFromDB();
             this._setup = true
         }
     }
 
-    public async readEloFromDB() {
+    public async notify(msg_content: any) {
+        // get the discord user for this player
+        const db_manager = DBManager.getInstance();
+        const discord_id = await db_manager.brawl_id_to_discord_id(this.id);
+        const user: User | undefined = client.users.cache.get(discord_id);
+        if (!user) {
+            throw new Error('I do not exist. Nothing exists. We live in the matrix.');
+        }
+        // send a message
+        try {
+            await user.send(msg_content);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    private async readRolesFromDB() {
+        // gets the preferred roles form the db
+        let roles = [];
+        const db_manager = DBManager.getInstance();
+        const db = await db_manager.db;
+        const rows = await db.all(`SELECT * FROM Roles WHERE BrawlhallaID = ?`, [this.id]); // get entries from the db
+        for (let row of rows) {
+            // find role corresponding to dbname
+            for (const role of Config.roles) {
+                if (role.db_name === row.Role) {
+                    roles.push(role);
+                }
+            }
+        }
+        this._roles = roles;
+    }
+
+    private async updateRolesInDB() {
+        // updates roles in the db
+        const db_manager = DBManager.getInstance();
+        const db = await db_manager.db;
+        await db.run("DELETE FROM Roles WHERE BrawlhallaID = ?", [this.id]);
+        for (const role of this.roles) {
+            db.run("INSERT INTO Roles VALUES(?, ?)", [this.id, role.db_name]);
+        }
+    }
+
+    private async readEloFromDB() {
         // gets a map of the elo for all the pools from the db
-        const db = await DBManager.getInstance().db;
+        const db_manager = DBManager.getInstance();
+        const db = await db_manager.db;
         for (let blueprint of Config.queues) {
-            if (await DBManager.getInstance().existsTable(blueprint.dbname)) {
-                let elo_rows = await db.get(`SELECT * FROM ${blueprint.dbname} WHERE Name = ?`, [this.id]) as DBPlayer; // get entry from the db
+            if (await db_manager.existsTable(blueprint.dbname)) {
+                let elo_rows = await db.get(`SELECT * FROM ${blueprint.dbname} WHERE BrawlhallaID = ?`, [this.id]) as DBPlayer; // get entry from the db
                 let db_elo = Config.eloOnStart  // initiate elo
                 if (elo_rows) {    // if there is an entry, read it
                     db_elo = elo_rows.Elo;
                 }
-                this._elo.set(blueprint, db_elo);
+                this.elo_map.set(blueprint, db_elo);
             }
         }
     }
@@ -54,24 +103,35 @@ export default class Player {
         // make sure table name exists to prevent SQL Injections
         if (await dbManager.existsTable(queue.dbname)) {
             // search for player in queue db
-            let result = await db.get(`SELECT * FROM ${queue.dbname} WHERE Name = ?`, [this.id]) as DBPlayer;  // player.id is Discord ID
+            let result = await db.get(`SELECT * FROM ${queue.dbname} WHERE BrawlhallaID = ?`, [this.id]) as DBPlayer;  // player.id is Brawlhalla ID
             // check if they were found
             if (!result) {
                 // add player to db if they don't already exist
                 await db.run(`INSERT INTO ${queue.dbname} VALUES(?,?)`, [this.id, this.getEloInQueue(queue.blueprint)]);
             } else {
                 // update elo if they do already exist
-                await db.run(`UPDATE ${queue.dbname} SET Elo = ? WHERE Name = ?`, [this.getEloInQueue(queue.blueprint), this.id]);
+                await db.run(`UPDATE ${queue.dbname} SET Elo = ? WHERE BrawlhallaID = ?`, [this.getEloInQueue(queue.blueprint), this.id]);
             }
+        } else {
+            throw new Error("This queue does not exist");
         }
     }
 
     public getEloInQueue(queue: QueueBlueprint): number {
         // figure out in which queue we want to set the elo
-        const elo = this._elo.get(queue);
+        const elo = this.elo_map.get(queue);
         if (elo)
             return elo;
         return Config.eloOnStart;
+    }
+
+    public get roles(): Role[] {
+        return this._roles;
+    }
+
+    public set roles(roles: Role[]) {
+        this._roles = roles;
+        this.updateRolesInDB();
     }
 
     public get elo(): number {
@@ -97,12 +157,18 @@ export default class Player {
         }
         // set the elo
         if (queue) {
-            let oldElo = this._elo.get(queue.blueprint);
+            let oldElo = this.elo_map.get(queue.blueprint);
             if (!oldElo)
                 oldElo = Config.eloOnStart;
-            this._elo.set(queue.blueprint, elo);
+            this.elo_map.set(queue.blueprint, elo);
             this.updateEloInDB(queue);
-            this.onEloChange.emit(elo - oldElo);
+            const elo_change_info: EloChangeInfo = {
+                queue_name: queue.blueprint.displayName,
+                old_elo: oldElo,
+                new_elo: elo,
+                elo_diff: elo - oldElo,
+            }
+            this.onEloChange.emit(elo_change_info);
         }
     }
 
@@ -140,7 +206,7 @@ export default class Player {
 
     public toString(): string {
         let to_string = `${this.id}:`;
-        for (let blueprint of this._elo.keys()) {
+        for (let blueprint of this.elo_map.keys()) {
             to_string = to_string.concat(`\t${blueprint.displayName}:\t${this.getEloInQueue(blueprint)} (${this.getRank(blueprint)})`);
         }
         return to_string;
@@ -156,35 +222,34 @@ export default class Player {
     }
 
     public getRank(blueprint: QueueBlueprint): string {
-        // (kind of) binary search to get the rank for a given player elo
         const elo = this.getEloInQueue(blueprint);
-        // initate l and r
-        let lowerBound: number = 0;
-        let upperBound: number = Config.ranks.length - 1;
-        // check the boundaries
-        if (elo < Config.ranks[lowerBound].start)
-            return Config.ranks[lowerBound].name;
-        if (elo > Config.ranks[upperBound].start)
-            return Config.ranks[upperBound].name;
-        // loop until we have a nice tight interval
-        while (upperBound - lowerBound > 1) {
-            let mid: number = Math.floor((lowerBound + upperBound) / 2);
-            if (elo < Config.ranks[mid].start) {
-                // mid can be new upper bound
-                upperBound = mid;
-            } else if (elo > Config.ranks[mid].start) {
-                // mid can be new lower bound
-                lowerBound = mid;
-            } else {
-                // exactly found our elo
-                return Config.ranks[mid].name;
-            }
-        }
-        return Config.ranks[lowerBound].name;
+        return Elo.elo_to_rank(elo);
+    }
+
+    public async getDiscordID(): Promise<string> {
+        const db = await DBManager.getInstance().db;
+        const discord_id_row = await db.get("SELECT * FROM Users WHERE BrawlhallaID = ?", [this.id]);
+        if (!discord_id_row)
+            throw new Error(`Player with Brawlhalla id ${this.id} not found.`);
+        return discord_id_row.DiscordID;
     }
 }
 
 export interface Rank {
     name: string;
     start: number;
+}
+
+export interface EloChangeInfo {
+    queue_name: string;
+    old_elo: number;
+    new_elo: number;
+    elo_diff: number;
+}
+
+export interface Role {
+    db_name: string;
+    display_name: string;
+    emoji: string;
+    acceptable_names: string[];
 }

@@ -14,7 +14,12 @@ export default class Match {
         this.players = teamA.players.concat(teamB.players);
     }
 
-    public report(winner: Winner) {
+    public async report(winner: Teams) {
+        // we want to wait for the players to be setup before we change their elo
+        for (let player of this.players) {
+            await player.setup();
+        }
+
         // determine the actual scores
         let scoreA: Score = this.winnerToScore(this.teamA.players[0], winner);
         let scoreB: Score = this.winnerToScore(this.teamB.players[0], winner);
@@ -38,39 +43,49 @@ export default class Match {
         });
     }
 
-    public scoreToWinner(player: Player, score: Score): Winner {
+    public scoreToWinner(player: Player, score: Score): Teams {
         if (this.teamA.players.includes(player)) {
             switch (score) {
-                case Score.Win: return Winner.PlayerA;
-                case Score.Draw: return Winner.None;
-                case Score.Loss: return Winner.PlayerB;
+                case Score.Win: return Teams.TeamA;
+                case Score.Draw: return Teams.None;
+                case Score.Loss: return Teams.TeamB;
             }
         } else if (this.teamB.players.includes(player)) {
             switch (score) {
-                case Score.Win: return Winner.PlayerB;
-                case Score.Draw: return Winner.None;
-                case Score.Loss: return Winner.PlayerA;
+                case Score.Win: return Teams.TeamB;
+                case Score.Draw: return Teams.None;
+                case Score.Loss: return Teams.TeamA;
             }
         } else {
             throw new Error("Player not in Match!");
         }
     }
 
-    public winnerToScore(player: Player, winner: Winner): Score {
+    public winnerToScore(player: Player, winner: Teams): Score {
         if (this.teamA.players.includes(player)) {
             switch (winner) {
-                case Winner.PlayerA: return Score.Win;
-                case Winner.PlayerB: return Score.Loss;
-                case Winner.None: return Score.Draw;
+                case Teams.TeamA: return Score.Win;
+                case Teams.TeamB: return Score.Loss;
+                case Teams.None: return Score.Draw;
             }
         } else if (this.teamB.players.includes(player)) {
             switch (winner) {
-                case Winner.PlayerA: return Score.Loss;
-                case Winner.PlayerB: return Score.Win;
-                case Winner.None: return Score.Draw;
+                case Teams.TeamA: return Score.Loss;
+                case Teams.TeamB: return Score.Win;
+                case Teams.None: return Score.Draw;
             }
         } else {
             throw new Error("Player not in Match!");
+        }
+    }
+
+    public static teamToScore(team: Teams, winner: Teams): Score {
+        if (winner == Teams.None) {
+            return Score.Draw;
+        } else if (team == winner) {
+            return Score.Win;
+        } else {
+            return Score.Loss;
         }
     }
 
@@ -90,8 +105,8 @@ export class QueuedMatch extends Match {
     }
 }
 
-export enum Winner {
-    PlayerA,
-    PlayerB,
+export enum Teams {
+    TeamA,
+    TeamB,
     None
 }

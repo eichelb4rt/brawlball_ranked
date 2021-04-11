@@ -2,15 +2,21 @@ import Discord, { Message } from "discord.js";
 import Command from "./interfaces/Command";
 import KEYS from './keys';
 import CommandLoader from "./CommandLoader";
-const client = new Discord.Client();
-const commandLoader = new CommandLoader();
+export const client = new Discord.Client();
+export const command_loader = new CommandLoader();
 
-client.once("ready", () => {
-	console.log("Ready!");
-});
+export function main() {
+	client.once("ready", () => {
+		console.log("Ready!");
+	});
+	
+	client.on("message", (message: Message) => {
+		command_loader.getCommandList().forEach((command: Command) => command.onMessage(message));
+	});
+	
+	client.login(KEYS.botToken);
+}
 
-client.on("message", (message: Message) => {
-	commandLoader.getCommandList().forEach((command: Command) => command.onMessage(message));
-});
-
-client.login(KEYS.botToken);
+if (require.main === module) {
+    main();
+}

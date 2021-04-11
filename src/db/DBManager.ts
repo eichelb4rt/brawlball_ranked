@@ -28,9 +28,25 @@ export default class DBManager {
             return true;
         return false;
     }
+
+    public async discord_id_to_brawl_id(discord_id: string): Promise<string> {
+        const db = await this.db;
+        const brawl_id_row = await db.get("SELECT * FROM Users WHERE DiscordID = ?", [discord_id]);
+        if (brawl_id_row)
+            return brawl_id_row.BrawlhallaID;
+        throw new Error(`There is no Brawlhalla account linked to <@${discord_id}>. To do that, type \`!link \{your Brawlhalla ID\}\``);
+    }
+
+    public async brawl_id_to_discord_id(brawl_id: string): Promise<string> {
+        const db = await this.db;
+        const discord_id_row = await db.get("SELECT * FROM Users WHERE BrawlhallaID = ?", [brawl_id]);
+        if (discord_id_row)
+            return discord_id_row.DiscordID;
+        throw new Error(`There is no Discord account linked to ${brawl_id}`);
+    }
 }
 
 export interface DBPlayer {
-    Name: string,
+    BrawlhallaID: string,
     Elo: number
 }
