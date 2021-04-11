@@ -21,9 +21,9 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-      env:
-        BRAWLHALLA_API_TOKEN: ${{ secrets.BRAWLHALLA_API_TOKEN }}
-        DISCORD_API_TOKEN: ${{ secrets.DISCORD_API_TOKEN }}
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
+    env:
+        BRAWLHALLA_API_TOKEN: ${{ secrets.BRAWLHALLA_API_TOKEN }}
+        DISCORD_API_TOKEN: ${{ secrets.DISCORD_API_TOKEN }}
