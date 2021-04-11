@@ -2,7 +2,7 @@ name: Deploy Node.js Application
  
 on:
   push:
-    branches: [ $default-branch ]
+    branches: [ master ]
  
 jobs:
   deploy:
