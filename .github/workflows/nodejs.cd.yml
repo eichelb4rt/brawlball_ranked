@@ -14,9 +14,6 @@ jobs:
           host: ${{secrets.SSH_HOST}}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          envs: 
-            BRAWLHALLA_API_TOKEN=${{ secrets.BRAWLHALLA_API_TOKEN }}
-            DISCORD_API_TOKENL=${{ secrets.DISCORD_API_TOKEN }}
           script: |
             cd brawlball_ranked
             git pull
