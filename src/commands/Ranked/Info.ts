@@ -56,7 +56,7 @@ export default class Info extends PublicCommand {
             .setColor(Config.embed_colour)
             .addField("Brawlhalla Name", brawl_name, true)
             .addField("Discord Name", discord_name, true)
-            .addField('Preferred Role', roles_str, true);
+            .addField('Preferred Roles', roles_str, true);
         
         // add the ranks where the player is actually ranked in
         let has_rank: boolean = false;  // determine if the player is actually ranked in anywhere
