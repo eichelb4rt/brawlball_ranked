@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node --trace-warnings build/main.js",
-    "test": "node --trace-warnings build/testing.js"
+    "test": "node --trace-warnings build/test.js",
+    "testing": "node --trace-warnings build/testing.js"
   },
   "repository": {
     "type": "git",
