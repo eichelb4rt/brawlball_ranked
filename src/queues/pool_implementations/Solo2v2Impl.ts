@@ -67,6 +67,16 @@ export default class Solo2v2Impl extends Pool {
 
     private evaluate(match: Match): number {
         // evaluates the quality or fairness of a match depending on the skill levels
+        // first, sort the players by elo and calc euclidean distance
+        let players_a_sorted = match.teamA.players;
+        let players_b_sorted = match.teamB.players;
+        function player_sort(player1: Player, player2: Player) {
+            if (player1.elo > player2.elo) return 1;
+            if (player1.elo < player2.elo) return -1;
+            return 0;
+        }
+        players_a_sorted.sort(player_sort);
+        players_b_sorted.sort(player_sort);
         return 0;
     }
 }

@@ -83,6 +83,8 @@ export default class Config {
 	static readonly poolDir = "queues";
 	static readonly poolImplementationsDir = "pool_implementations";
 
+	static readonly euclidean_distance_amplifier = 1 / 10;
+
 	////////////////////////////////////////////////////////////////
 	// Roles
 	////////////////////////////////////////////////////////////////
