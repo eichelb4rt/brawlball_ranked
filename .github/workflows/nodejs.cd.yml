@@ -13,7 +13,7 @@ jobs:
         with:
           host: ${{secrets.SSH_HOST}}
           username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.DISCORD_PLAY_FMI_PPK }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             BRAWLHALLA_API_TOKEN=${{ secrets.BRAWLHALLA_API_TOKEN }}
             DISCORD_API_TOKENL=${{ secrets.DISCORD_API_TOKEN }}
