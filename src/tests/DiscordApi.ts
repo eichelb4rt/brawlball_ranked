@@ -2,7 +2,7 @@ import Discord from "discord.js";
 import Config from "../Config";
 import Test from "../interfaces/Test";
 
-export default class BrawlApiTest extends Test {
+export default class DiscordApiTest extends Test {
     name = "Discord Api ready";
 
     public async run(): Promise<boolean> {

@@ -3,6 +3,9 @@ import Command from "./interfaces/Command";
 import CommandLoader from "./CommandLoader";
 import Config from "./Config";
 import MatchManager from "./matches/MatchManager";
+import QueueManager from "./queues/QueueManager";
+import PlayerCache from "./players/PlayerCache";
+import BrawlApiWrapper from "./db/BrawlApiWrapper";
 
 export const client = new Discord.Client();
 export const command_loader = new CommandLoader();
@@ -21,7 +24,10 @@ export function main() {
 }
 
 function setup() {
-	const match_manager = MatchManager.getInstance();
+	MatchManager.getInstance();
+	QueueManager.getInstance();
+	PlayerCache.getInstance();
+	BrawlApiWrapper.getInstance();
 }
 
 if (require.main === module) {
