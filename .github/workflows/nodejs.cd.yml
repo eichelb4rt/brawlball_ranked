@@ -19,4 +19,5 @@ jobs:
             git pull
             npm install
             npm run build --if-present
-            npm test & screen -X -S 'brawlball_ranked' quit  & echo 'Succesfully deleted last session. Now restarting.' &  screen -md -S 'brawlball_ranked' npm start
+            screen -X -S 'brawlball_ranked' quit  & echo 'Succesfully deleted last session.'
+            npm test &  screen -md -S 'brawlball_ranked' npm start
