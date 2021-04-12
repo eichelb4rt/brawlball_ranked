@@ -2,7 +2,6 @@ import { Message, MessageReaction, TextChannel, User } from "discord.js"
 import PublicCommand from "../../interfaces/PublicCommand";
 import DBManager from "../../db/DBManager";
 import PlayerCache from "../../players/PlayerCache";
-import QueueManager from "../../queues/QueueManager";
 import Team from "../../players/Team";
 
 export default class Invite extends PublicCommand {

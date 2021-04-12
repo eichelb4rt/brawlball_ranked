@@ -1,7 +1,8 @@
 import Match from "../../matches/Match";
 import Player from "../../players/Player";
-import Pool, { PoolSystem } from "../Pool";
+import Pool from "../Pool";
 import Team, { JoinConfig } from "../../players/Team";
+import PoolSystem from "../PoolSystem";
 
 export default class Solo2v2Impl extends Pool {
     static readonly poolSystem = PoolSystem.Solo2v2;
