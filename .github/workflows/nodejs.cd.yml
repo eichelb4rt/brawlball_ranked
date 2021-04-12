@@ -20,4 +20,4 @@ jobs:
             npm install
             npm run build --if-present
             screen -X -S 'brawlball_ranked' quit && echo 'Succesfully deleted last session.'
-            npm test && screen -md -S 'brawlball_ranked' npm start & echo 'Started new session.'
+            npm test && screen -md -S 'brawlball_ranked' npm start && echo 'Started new session.'
