@@ -50,7 +50,7 @@ export default class Link extends PublicCommand {
         for (let role of chosen_roles) {
             roles_str = roles_str.concat(`${role.display_name} `);
         }
-        channel.send(`You have chosen these roles: ${roles_str}`);
+        channel.send(`<@${msg.author.id}> you have chosen these roles: ${roles_str}`);
 
     }
 
