@@ -1,4 +1,4 @@
-import { Message } from "discord.js"
+import { Message, TextChannel } from "discord.js"
 import DBManager from "../../db/DBManager";
 import PublicCommand from "../../interfaces/PublicCommand";
 import BrawlApiWrapper from "../../db/BrawlApiWrapper";
@@ -10,6 +10,12 @@ export default class Link extends PublicCommand {
     usage: string = "!link <your_brawlhalla_id>";
 
     async action(msg: Message): Promise<void> {
+        const channel = msg.channel as TextChannel;
+        const args = msg.content.split(/ +/);
+        if (args.length < 2) {
+            channel.send("Please provide your Brawlhalla ID.");
+            return;
+        }
         const brawl_id: string = msg.content.split(/ +/)[1];    // separate by whitespace and take 2nd argument
 
         const db = await DBManager.getInstance().db;
@@ -20,14 +26,14 @@ export default class Link extends PublicCommand {
         try {
             name = await brawl_api_wrapper.getNameByID(brawl_id);
         } catch (e) {
-            msg.channel.send("This id does not belong to any Brawlhalla User.");
+            channel.send("This id does not belong to any Brawlhalla User.");
             return;
         }
 
         // check if the brawlhalla id was already given away
         let found_account = await db.get("SELECT * FROM Users WHERE BrawlhallaID = ?", [brawl_id]);
         if (found_account) {
-            msg.channel.send(`This id already belongs to <@${found_account.DiscordID}>.`);
+            channel.send(`This id already belongs to <@${found_account.DiscordID}>.`);
             return;
         }
 
