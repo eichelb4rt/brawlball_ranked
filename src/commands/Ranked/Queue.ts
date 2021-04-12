@@ -3,6 +3,8 @@ import PublicCommand from "../../interfaces/PublicCommand";
 import DBManager from "../../db/DBManager";
 import PlayerCache from "../../players/PlayerCache";
 import QueueManager from "../../queues/QueueManager";
+import Config from "../../Config";
+import QueueBlueprint from "../../queues/QueueBlueprint";
 
 export default class QueueCommand extends PublicCommand {
     name: string = "queue";
@@ -21,11 +23,30 @@ export default class QueueCommand extends PublicCommand {
             return;
         }
 
-        let args = channel.name.split("_");
+        // get the queue that they want to queue in by channel name
+        // example: eur_team_3v3 (region_display_name)
+        const args = channel.name.split("_");
+        if (args.length < 2) {
+            channel.send("Channel has invalid format for queueing.");
+            return;
+        }
 
-        // example: eur_team_3v3
+        // region is the first argument
         let region = args[0].toUpperCase();
-        let pool = args[1] + args[2];
+        if (!Config.regions.includes(region)) {
+            channel.send(`Region \`${region}\` not found.`);
+            return;
+        }
+
+        // everything after is the display name with underlines for whitespace
+        let pool_display_name = args.slice(1).join(" ");
+        let pool_db_name: string;
+        try {
+            pool_db_name = this.find_pool(pool_display_name)?.dbname;
+        } catch (e) {
+            channel.send(e.message);
+            return;
+        }
 
         // get the brawl id corresponding to the discord id
         const db_manager = DBManager.getInstance();
@@ -39,7 +60,7 @@ export default class QueueCommand extends PublicCommand {
 
         // let the queuemanager handle the rest
         try {
-            await this.queue(brawl_id, pool, region);
+            await this.queue(brawl_id, pool_db_name, region);
             channel.send("Searching for players...");
         } catch (e) {
             channel.send(e.message);
@@ -47,7 +68,7 @@ export default class QueueCommand extends PublicCommand {
         }
     }
 
-    async queue(brawlId: string, pool: string, region: string) {
+    private async queue(brawlId: string, pool: string, region: string) {
         const playerCache = PlayerCache.getInstance();
         const queueManager = QueueManager.getInstance();
         const player = playerCache.getPlayer(brawlId);
@@ -60,6 +81,15 @@ export default class QueueCommand extends PublicCommand {
         } else {
             return await queueManager.addToSoloQueue(pool, region, player);
         }
+    }
+
+    private find_pool(display_name: string): QueueBlueprint {
+        for (const blueprint of Config.queues) {
+            if (blueprint.displayName.toLowerCase() === display_name.toLowerCase()) {
+                return blueprint
+            }
+        }
+        throw new Error(`Pool \`${display_name}\` not found.`);
     }
 }
 
