@@ -7,6 +7,7 @@ import Elo, { Score } from "../../matches/Elo";
 import Match, { Teams } from "../../matches/Match";
 import Player from "../../players/Player";
 import Config from "../../Config";
+import MatchManager from "../../matches/MatchManager";
 
 export default class Link extends PublicCommand {
     readonly time_until_WL_expires = 1 * 60 * 1000; // first reaction: W or L
@@ -54,8 +55,9 @@ export default class Link extends PublicCommand {
         const confirmed: boolean = await this.ask_for_confirmation(channel, reporting_player, match, winner);   // confirm it
 
         // report the match if confirmed, do nothing if denied.
+        const match_manager = MatchManager.getInstance();
         if (confirmed) {
-            match.report(winner);
+            match_manager.report(reporting_player, score);
             channel.send('Result confirmed.');
         } else {
             channel.send('Result denied.');
