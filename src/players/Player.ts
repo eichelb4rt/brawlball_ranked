@@ -1,12 +1,14 @@
 import { SubEvent } from "sub-events";
 import Config from "../Config"
-import Queue, { QueueBlueprint } from "../queues/Queue";
+import Queue from "../queues/Queue";
 import Elo, { Score } from "../matches/Elo"
 import DBManager, { DBPlayer } from "../db/DBManager";
 import Team from "./Team";
 import { QueuedMatch } from "../matches/Match";
 import { client } from "../main";
 import { User } from "discord.js";
+import QueueBlueprint from "../queues/QueueBlueprint";
+import Role from "./Role";
 
 export default class Player {
     public readonly id: string; // brawl id
@@ -235,21 +237,9 @@ export default class Player {
     }
 }
 
-export interface Rank {
-    name: string;
-    start: number;
-}
-
 export interface EloChangeInfo {
     queue_name: string;
     old_elo: number;
     new_elo: number;
     elo_diff: number;
-}
-
-export interface Role {
-    db_name: string;
-    display_name: string;
-    emoji: string;
-    acceptable_names: string[];
 }

@@ -1,7 +1,8 @@
-import { Rank, Role } from "./players/Player";
-import { PoolSystem } from "./queues/Pool";
-import { QueueBlueprint } from "./queues/Queue";
+import PoolSystem from "./queues/PoolSystem";
+import QueueBlueprint from "./queues/QueueBlueprint";
 import dotenv from "dotenv";
+import Rank from "./players/Rank";
+import Role from "./players/Role";
 dotenv.config();
 
 export default class Config {
@@ -83,7 +84,7 @@ export default class Config {
 	static readonly poolDir = "queues";
 	static readonly poolImplementationsDir = "pool_implementations";
 
-	static readonly euclidean_distance_amplifier = 1 / 10;
+	static readonly euclidean_distance_amplifier = 1 / 100;
 
 	////////////////////////////////////////////////////////////////
 	// Roles
