@@ -11,7 +11,7 @@ import MatchManager from "../../matches/MatchManager";
 
 export default class Link extends PublicCommand {
     readonly time_until_WL_expires = 1 * 60 * 1000; // first reaction: W or L
-    readonly time_until_auto_confirm = 5 * 1000;  // enemies confirmation of W or L
+    readonly time_until_auto_confirm = 5 * 60 * 1000;  // enemies confirmation of W or L
 
     name: string = "report";
     short_description: string = "Report the result of your ranked match.";

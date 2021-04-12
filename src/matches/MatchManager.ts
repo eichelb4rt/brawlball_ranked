@@ -97,7 +97,9 @@ export default class MatchManager {
         // the match is over, links can be deleted
         for (let player of match.players) {
             player.match = undefined;
-            player.team!.match = undefined;
+            if (player.team) {
+                player.team.match = undefined;
+            }
         }
     }
 }

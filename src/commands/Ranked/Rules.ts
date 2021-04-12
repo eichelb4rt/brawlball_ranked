@@ -27,7 +27,9 @@ export default class Help extends PublicCommand {
             .addField("Score to Win", this.score_to_win, false)
             .addField("Team Damage", this.team_dmg ? "on" : "off", true)
             .addField("Test Features", this.test_features ? "on" : "off", true)
-            .addField("Damage", `${this.damage * 100}%`, false);
+            .addField("Damage", `${this.damage * 100}%`, true)
+            .addField("Map", `(Big?) Brawlball Stadium`, false)
+            .addField("Disconnects", `If anyone disconnects at the __start of the match__, everyone has to wait. Do *not* touch the ball so it can reset properly and respawns in the middle. If anyone disconnects in the __middle of a match__, an attack can be continued. The attack ends if the enemy gains ball control.`, false);
         channel.send(embed);
     }
 }
