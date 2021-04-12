@@ -4,4 +4,3 @@ src/testing.ts
 **/.vscode/
 **/*.log
 .env
-src/db/elo.db
