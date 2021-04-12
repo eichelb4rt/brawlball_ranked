@@ -41,9 +41,9 @@ export default class Elo {
         let lowerBound: number = 0;
         let upperBound: number = Config.ranks.length - 1;
         // check the boundaries
-        if (elo < Config.ranks[lowerBound].start)
+        if (elo <= Config.ranks[lowerBound].start)
             return Config.ranks[lowerBound].name;
-        if (elo > Config.ranks[upperBound].start)
+        if (elo >= Config.ranks[upperBound].start)
             return Config.ranks[upperBound].name;
         // loop until we have a nice tight interval
         while (upperBound - lowerBound > 1) {

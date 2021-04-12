@@ -19,7 +19,7 @@ export default class Solo2v2Impl extends Pool {
 
     add(team: Team): void {
         for (let player of team.players) {
-            this.players.push(player)
+            this.players.push(player);
         }
     }
 
@@ -38,12 +38,12 @@ export default class Solo2v2Impl extends Pool {
             // put the first half in team a
             let teamA: Team = new Team();
             for (let i = 0; i < this.maxTeamSize; i++) {
-                teamA.join(players[i], JoinConfig.System)
+                teamA.join(players[i], JoinConfig.System);
             }
             // put the second half in team b
             let teamB: Team = new Team();
             for (let i = this.maxTeamSize; i < 2 * this.maxTeamSize; i++) {
-                teamB.join(players[i], JoinConfig.System)
+                teamB.join(players[i], JoinConfig.System);
             }
             // return the found match
             return new Match(teamA, teamB);
