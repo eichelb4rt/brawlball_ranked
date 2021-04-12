@@ -1,7 +1,8 @@
 import FS from "fs";
 import Path from "path";
 import Config from "../Config";
-import Pool, { PoolSystem } from "./Pool"
+import Pool from "./Pool"
+import PoolSystem from "./PoolSystem";
 
 export default class PoolFactory {
     // creates PoolImplementaions based on the PoolSystem

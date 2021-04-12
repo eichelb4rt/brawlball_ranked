@@ -1,7 +1,8 @@
 import Match from "../../matches/Match";
 import Player from "../../players/Player";
-import Pool, { PoolSystem } from "../Pool";
+import Pool from "../Pool";
 import Team from "../../players/Team";
+import PoolSystem from "../PoolSystem";
 
 export default class Team3v3Impl extends Pool {
     static readonly poolSystem = PoolSystem.Team3v3;

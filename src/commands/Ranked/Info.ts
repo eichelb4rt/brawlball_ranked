@@ -1,9 +1,7 @@
-import { Message, MessageEmbed, MessageReaction, TextChannel, User } from "discord.js"
+import { Message, MessageEmbed, TextChannel, User } from "discord.js"
 import PublicCommand from "../../interfaces/PublicCommand";
 import DBManager from "../../db/DBManager";
 import PlayerCache from "../../players/PlayerCache";
-import QueueManager from "../../queues/QueueManager";
-import Team from "../../players/Team";
 import BrawlApiWrapper from "../../db/BrawlApiWrapper";
 import Config from "../../Config";
 

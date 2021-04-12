@@ -1,8 +1,9 @@
-import Pool, { PoolSystem } from "./Pool"
+import Pool from "./Pool"
 import PoolFactory from "./PoolFactory"
 import Config from "../Config"
 import Match from "../matches/Match"
 import { SubEvent } from "sub-events";
+import QueueBlueprint from "./QueueBlueprint";
 
 export default class Queue {
     public readonly dbname: string;   // name in the db
@@ -41,8 +42,3 @@ export default class Queue {
     }
 }
 
-export interface QueueBlueprint {
-    dbname: string;
-    displayName: string;
-    poolSystem: PoolSystem;
-}

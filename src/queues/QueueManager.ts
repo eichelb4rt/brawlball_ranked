@@ -1,11 +1,10 @@
 import { SubEvent } from "sub-events";
 import Config from "../Config";
-import Match, { QueuedMatch } from "../matches/Match";
+import { QueuedMatch } from "../matches/Match";
 import Player from "../players/Player";
 import Pool from "./Pool";
-import Queue, { QueueBlueprint } from "./Queue";
+import Queue from "./Queue";
 import Team, { JoinConfig } from "../players/Team";
-import BrawlApiWrapper from "../db/BrawlApiWrapper";
 
 export default class QueueManager {
     // singleton

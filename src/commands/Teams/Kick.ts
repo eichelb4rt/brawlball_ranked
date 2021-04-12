@@ -1,9 +1,7 @@
-import { Message, MessageReaction, TextChannel, User } from "discord.js"
+import { Message, TextChannel } from "discord.js"
 import PublicCommand from "../../interfaces/PublicCommand";
 import DBManager from "../../db/DBManager";
 import PlayerCache from "../../players/PlayerCache";
-import QueueManager from "../../queues/QueueManager";
-import Team from "../../players/Team";
 
 export default class Kick extends PublicCommand {
     name: string = "kick";

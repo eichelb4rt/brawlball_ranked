@@ -1,10 +1,7 @@
 import { Message, MessageEmbed, TextChannel } from "discord.js"
 import moment from "moment";
-import { off } from "process";
-import CommandLoader from "../../CommandLoader";
 import Config from "../../Config";
 import PublicCommand from "../../interfaces/PublicCommand";
-import { command_loader } from "../../main";
 
 export default class Help extends PublicCommand {
     name: string = "rules";

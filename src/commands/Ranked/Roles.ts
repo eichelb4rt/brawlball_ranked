@@ -1,12 +1,9 @@
-import { Message, MessageEmbed, MessageReaction, TextChannel, User } from "discord.js"
+import { Message, MessageReaction, TextChannel, User } from "discord.js"
 import DBManager from "../../db/DBManager";
 import PublicCommand from "../../interfaces/PublicCommand";
-import BrawlApiWrapper from "../../db/BrawlApiWrapper";
 import PlayerCache from "../../players/PlayerCache";
-import Elo, { Score } from "../../matches/Elo";
-import Match, { Teams } from "../../matches/Match";
-import Player, { Role } from "../../players/Player";
 import Config from "../../Config";
+import Role from "../../players/Role";
 
 export default class Link extends PublicCommand {
     readonly time_unti_message_deleted = 5 * 1000;
