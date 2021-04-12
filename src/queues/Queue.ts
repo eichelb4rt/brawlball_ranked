@@ -32,7 +32,7 @@ export default class Queue {
         // delete the players in the match from the pool
         // emit Match to subcribers
         setInterval(async () => {
-            let match: Match | null = (await this.pool.getMatch());   // ask the Pool to find a Match - NotNull assertion
+            let match: Match | null = await this.pool.getMatch();   // ask the Pool to find a Match
             if (match) {
                 // remove match players from pool and queue
                 this.pool.remove(match.players);

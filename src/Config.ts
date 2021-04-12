@@ -67,7 +67,7 @@ export default class Config {
 	// Queues
 	////////////////////////////////////////////////////////////////
 
-	static readonly queueWaitingTime = 3;	// time interval in seconds for refreshing match function
+	static readonly queueWaitingTime = 30;	// time interval in seconds for refreshing match function
 
 	static readonly regions = [
 		"NA",

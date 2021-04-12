@@ -41,7 +41,7 @@ export default class PlayerCache {
     }
 
     private onEloChangeEmbed(info: EloChangeInfo): MessageEmbed {
-        const elo_diff: string = info.elo_diff > 0 ? `+${info.elo_diff}` : `${info.elo_diff}`;
+        const elo_diff: string = info.elo_diff >= 0 ? `+${info.elo_diff}` : `${info.elo_diff}`;
         const embed = new MessageEmbed()
             .setTitle('Your elo changed')
             .setColor(Config.embed_colour)
