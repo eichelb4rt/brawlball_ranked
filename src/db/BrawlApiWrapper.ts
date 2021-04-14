@@ -27,7 +27,7 @@ export default class BrawlApiWrapper {
         }).then((res) => {
             return res.data.name;
         }).catch((err) => {
-            return err;
+            Promise.reject(err);
         });
     }
 }
