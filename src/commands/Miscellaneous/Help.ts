@@ -3,26 +3,48 @@ import CommandLoader from "../../CommandLoader";
 import Config from "../../Config";
 import PublicCommand from "../../interfaces/PublicCommand";
 import { command_loader } from "../../main";
+import ArgumentParser, { Arguments } from "../../ui/ArgumentParser";
 
 export default class Help extends PublicCommand {
     name: string = "help";
     short_description: string = "Help! It's a flying spaghetti monster!";
     long_description: string = "Help! It's a flying spaghetti monster!";
-    usage: string = "!help";
+
+    private arg_parser: ArgumentParser;
+    constructor() {
+        super();
+        this.arg_parser = new ArgumentParser(this.invoke_str);
+        this.arg_parser.add_argument({
+            name: "command",
+            dest: "command",
+            help: "the command you to know more about",
+            optional: true
+        });
+    }
+
+    public get usage(): string {
+        return this.arg_parser.usage;
+    }
 
     action(msg: Message): void {
         const channel = msg.channel as TextChannel;
-        const args = msg.content.split(/ +/);
-        if (args.length == 1) { // only invoke string
-            channel.send(this.general_help_embed());
-        } else if (args.length == 2) {
+        // try to get arguments
+        let args: Arguments;
+        try {
+            args = this.arg_parser.parse_arguments(msg.content);
+        } catch (e) {
+            channel.send(e.message);
+            return;
+        }
+        // if a command was given, show man page. otherwise show general help
+        if (args.command) {
             try {
                 channel.send(this.man_page(args[1]));
             } catch (e) {
                 channel.send(e.message);
             }
         } else {
-            channel.send("You can only get help for 1 command.");
+            channel.send(this.general_help_embed());
         }
     }
 
@@ -44,7 +66,7 @@ export default class Help extends PublicCommand {
 
     man_page(command_str: string): MessageEmbed {
         // find command
-        const commands = CommandLoader.getCommandList(Config.publicCommandsDir).map(command => command as PublicCommand);
+        const commands = CommandLoader.getCommandList(Config.publicCommandsDir).map(public_command => public_command as PublicCommand);
         let command: PublicCommand | undefined = undefined;
         for (let command_in_list of commands) {
             if (command_in_list.name === command_str) {

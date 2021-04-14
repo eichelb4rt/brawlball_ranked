@@ -34,7 +34,7 @@ export default class DBManager {
         const brawl_id_row = await db.get("SELECT * FROM Users WHERE DiscordID = ?", [discord_id]);
         if (brawl_id_row)
             return brawl_id_row.BrawlhallaID;
-        throw new Error(`There is no Brawlhalla account linked to <@${discord_id}>. To do that, type \`!link \{your Brawlhalla ID\}\``);
+        throw new Error(`There is no Brawlhalla account linked to <@${discord_id}>. \`!help link\` to find out how to do that.`);
     }
 
     public async brawl_id_to_discord_id(brawl_id: string): Promise<string> {

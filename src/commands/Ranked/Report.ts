@@ -8,6 +8,7 @@ import Match, { Teams } from "../../matches/Match";
 import Player from "../../players/Player";
 import Config from "../../Config";
 import MatchManager from "../../matches/MatchManager";
+import ArgumentParser from "../../ui/ArgumentParser";
 
 export default class Link extends PublicCommand {
     readonly time_until_WL_expires = 1 * 60 * 1000; // first reaction: W or L
@@ -16,7 +17,22 @@ export default class Link extends PublicCommand {
     name: string = "report";
     short_description: string = "Report the result of your ranked match.";
     long_description: string = `Report whether your **W**on or **L**ost your ranked match. The result can also be a **tie**. A player of the enemy team has to confirm the result. It will automatically be confirmed after ${(this.time_until_auto_confirm / (60 * 1000)).toFixed(2)} minutes.`;
-    usage: string = "!report";
+
+    private arg_parser: ArgumentParser;
+    constructor() {
+        super();
+        this.arg_parser = new ArgumentParser(this.invoke_str);
+        this.arg_parser.add_argument({
+            name: "result",
+            dest: "result",
+            help: "Result of the match.",
+            optional: true
+        });
+    }
+
+    public get usage(): string {
+        return this.arg_parser.usage;
+    }
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;
@@ -70,15 +86,16 @@ export default class Link extends PublicCommand {
         const strings_for_draw = ['D', 'Draw', 'Tie'];
         const strings_for_loss = ['L', 'Loss', 'fuck'];
 
-        const args = msg.content.split(/ +/);
-        if (args.length > 1) {
-            const arg_score = args[1].toLowerCase();
-            if (strings_for_win.map(str => str.toLowerCase()).includes(arg_score)) {
+        let args = this.arg_parser.parse_arguments(msg.content);
+        if (args.result) {
+            if (strings_for_win.map(str => str.toLowerCase()).includes(args.result)) {
                 return Score.Win;
-            } else if (strings_for_draw.map(str => str.toLowerCase()).includes(arg_score)) {
+            } else if (strings_for_draw.map(str => str.toLowerCase()).includes(args.result)) {
                 return Score.Draw;
-            } else if (strings_for_loss.map(str => str.toLowerCase()).includes(arg_score)) {
+            } else if (strings_for_loss.map(str => str.toLowerCase()).includes(args.result)) {
                 return Score.Loss;
+            } else {
+                throw new Error(`${args.result} is not a valid match result.`);
             }
         }
 
@@ -93,7 +110,7 @@ export default class Link extends PublicCommand {
 
         // filter for reactions (we only want to listen for reactions from the invited player that are accepting or declining the invitation)
         const filter = (reaction: MessageReaction, user: User) => {
-            return choices.includes(reaction.emoji.name) && user.id == msg.author.id;
+            return choices.includes(reaction.emoji.name) && user.id === msg.author.id;
         };
         
         // listen for reactions
@@ -105,11 +122,11 @@ export default class Link extends PublicCommand {
 
         // process reaction
         let score: Score;
-        if (first_reaction?.emoji.name == win_emoji) {   // user reported dub
+        if (first_reaction?.emoji.name === win_emoji) {   // user reported dub
             score = Score.Win;
-        } else if (first_reaction?.emoji.name == tie_emoji) {   // user reported tie
+        } else if (first_reaction?.emoji.name === tie_emoji) {   // user reported tie
             score = Score.Draw;
-        } else if (first_reaction?.emoji.name == loss_emoji) {    // loser reported loss
+        } else if (first_reaction?.emoji.name === loss_emoji) {    // loser reported loss
             score = Score.Loss;
         } else {    // listener did not find reactions in the given time (time_until_WL_expires)
             throw new Error('Your time to report the match expired.');
@@ -173,9 +190,9 @@ export default class Link extends PublicCommand {
         // we can delete the first embed after it was confirmed or declined
 
         // process reaction
-        if (first_reaction?.emoji.name == confirm_emoji) {   // user reported dub
+        if (first_reaction?.emoji.name === confirm_emoji) {   // user reported dub
             return true;
-        } else if (first_reaction?.emoji.name == deny_emoji) {   // user reported tie
+        } else if (first_reaction?.emoji.name === deny_emoji) {   // user reported tie
             return false;
         } else {    // listener did not find reactions in the given time (time_until_WL_expires)
             channel.send(`Result was automatically confirmed after ${(this.time_until_auto_confirm / (60 * 1000)).toFixed(2)} minutes.`);

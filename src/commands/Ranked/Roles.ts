@@ -4,6 +4,7 @@ import PublicCommand from "../../interfaces/PublicCommand";
 import PlayerCache from "../../players/PlayerCache";
 import Config from "../../Config";
 import Role from "../../players/Role";
+import ArgumentParser from "../../ui/ArgumentParser";
 
 export default class Link extends PublicCommand {
     readonly time_unti_message_deleted = 5 * 1000;
@@ -11,7 +12,34 @@ export default class Link extends PublicCommand {
     name: string = "roles";
     short_description: string = "Set your Brawlball roles (run, defend, support).";
     long_description: string = `Set your Brawlball roles (run, defend, support). You've got ${this.time_unti_message_deleted}s time to set (react) your roles after the command has been sent. Alternatively, you can give your preferred roles a parameters to the command.`;
-    usage: string = "!roles";
+    
+    private arg_parser: ArgumentParser;
+    constructor() {
+        super();
+        this.arg_parser = new ArgumentParser(this.invoke_str);
+        this.arg_parser.add_argument({
+            name: "Role1",
+            dest: "role_1",
+            help: "A role you can that's going to be assigned to you. (run/def/sup)",
+            optional: true
+        });
+        this.arg_parser.add_argument({
+            name: "Role2",
+            dest: "role_2",
+            help: "A role you can that's going to be assigned to you. (run/def/sup)",
+            optional: true
+        });
+        this.arg_parser.add_argument({
+            name: "Role2",
+            dest: "role_2",
+            help: "A role you can that's going to be assigned to you. (run/def/sup)",
+            optional: true
+        });
+    }
+
+    public get usage(): string {
+        return this.arg_parser.usage;
+    }
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;
