@@ -3,13 +3,29 @@ import PublicCommand from "../../interfaces/PublicCommand";
 import DBManager from "../../db/DBManager";
 import PlayerCache from "../../players/PlayerCache";
 import Team from "../../players/Team";
+import ArgumentParser from "../../ui/ArgumentParser";
 
 export default class Invite extends PublicCommand {
+    readonly time_until_expired = 5 * 60 * 1000;
     name: string = "invite";
     short_description: string = "Invite players to your team.";
-    long_description: string = "Invite players to your team.";
-    usage: string = "!invite <mention>";
-    readonly time_until_expired = 5 * 60 * 1000;
+    long_description: string = `Invite players to your team. Invitation expires after ${(this.time_until_expired / (60 * 1000)).toFixed(2)} minutes`;
+
+    private arg_parser: ArgumentParser;
+    constructor() {
+        super();
+        this.arg_parser = new ArgumentParser(this.invoke_str);
+        this.arg_parser.add_argument({
+            name: "@mention",
+            dest: "mention",
+            help: "Mention a Discord user to invite them to your team.",
+            optional: true
+        });
+    }
+
+    public get usage(): string {
+        return this.arg_parser.usage;
+    }
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;

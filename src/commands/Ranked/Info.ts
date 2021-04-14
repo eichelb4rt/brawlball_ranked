@@ -4,12 +4,28 @@ import DBManager from "../../db/DBManager";
 import PlayerCache from "../../players/PlayerCache";
 import BrawlApiWrapper from "../../db/BrawlApiWrapper";
 import Config from "../../Config";
+import ArgumentParser from "../../ui/ArgumentParser";
 
 export default class Info extends PublicCommand {
-    name: string = "info";
+    name: string = "rank";
     short_description: string = "Get some ranked info.";
     long_description: string = "Shows: brawlhalla name, discord name, rank, preferred role.\nMention a player to get their info. If no player is given, it will show info about you.";
-    usage: string = "!info [<mention/brawlhalla_name>]";
+
+    private arg_parser: ArgumentParser;
+    constructor() {
+        super();
+        this.arg_parser = new ArgumentParser(this.invoke_str);
+        this.arg_parser.add_argument({
+            name: "@mention",
+            dest: "mention",
+            help: "Mention a Discord user to get their info.",
+            optional: true
+        });
+    }
+
+    public get usage(): string {
+        return this.arg_parser.usage;
+    }
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;

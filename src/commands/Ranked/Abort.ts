@@ -18,7 +18,7 @@ export default class Abort extends PublicCommand {
         const brawlId = (await db.get("SELECT * FROM Users WHERE DiscordID = ?", [msg.author.id]))!.BrawlhallaID;
 
         if (!brawlId) {
-            channel.send("You don't have a Brawlhalla Account linked. To do that, type `!link \{your Brawlhalla ID\}`");
+            channel.send("You don't have a Brawlhalla Account linked. \`!help link\` to find out how to do that.");
             return;
         }
 

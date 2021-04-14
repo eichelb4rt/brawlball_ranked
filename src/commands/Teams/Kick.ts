@@ -2,12 +2,28 @@ import { Message, TextChannel } from "discord.js"
 import PublicCommand from "../../interfaces/PublicCommand";
 import DBManager from "../../db/DBManager";
 import PlayerCache from "../../players/PlayerCache";
+import ArgumentParser from "../../ui/ArgumentParser";
 
 export default class Kick extends PublicCommand {
     name: string = "kick";
     short_description: string = "Kick players from your team.";
     long_description: string = "Kick player from your team. Only the host can kick people.";
-    usage: string = "!kick <mention>";
+
+    private arg_parser: ArgumentParser;
+    constructor() {
+        super();
+        this.arg_parser = new ArgumentParser(this.invoke_str);
+        this.arg_parser.add_argument({
+            name: "@mention",
+            dest: "mention",
+            help: "Mention a Discord user to kick them from your team.",
+            optional: true
+        });
+    }
+
+    public get usage(): string {
+        return this.arg_parser.usage;
+    }
 
     async action(msg: Message): Promise<void> {
         const channel = msg.channel as TextChannel;
