@@ -16,7 +16,7 @@ export default class Link extends PublicCommand {
         this.arg_parser.add_argument({
             name: "BrawlhallaID",
             dest: "brawl_id",
-            help: "Your Brawlhalla ID. Can be found in your inventory."
+            help: "Your Brawlhalla ID."
         });
     }
 

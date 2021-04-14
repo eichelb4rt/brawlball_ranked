@@ -17,7 +17,7 @@ export default class Help extends PublicCommand {
         this.arg_parser.add_argument({
             name: "command",
             dest: "command",
-            help: "the command you to know more about",
+            help: "The command you to know more about.",
             optional: true
         });
     }
@@ -39,7 +39,7 @@ export default class Help extends PublicCommand {
         // if a command was given, show man page. otherwise show general help
         if (args.command) {
             try {
-                channel.send(this.man_page(args[1]));
+                channel.send(this.man_page(args.command));
             } catch (e) {
                 channel.send(e.message);
             }
@@ -85,7 +85,7 @@ export default class Help extends PublicCommand {
             .setColor(Config.embed_colour)
             .setDescription(`Help page for \`${command.name}\``)
             .addField("Description", command.long_description, false)
-            .addField("Usage", command.usage, false);
+            .addField("Usage", `\`\`\`${command.usage}\`\`\``, false);
         return helpEmbed;
     }
 }

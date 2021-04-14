@@ -20,19 +20,19 @@ export default class Link extends PublicCommand {
         this.arg_parser.add_argument({
             name: "Role1",
             dest: "role_1",
-            help: "A role you can that's going to be assigned to you. (run/def/sup)",
+            help: "(run/def/sup)",
             optional: true
         });
         this.arg_parser.add_argument({
             name: "Role2",
             dest: "role_2",
-            help: "A role you can that's going to be assigned to you. (run/def/sup)",
+            help: "(run/def/sup)",
             optional: true
         });
         this.arg_parser.add_argument({
             name: "Role2",
             dest: "role_2",
-            help: "A role you can that's going to be assigned to you. (run/def/sup)",
+            help: "(run/def/sup)",
             optional: true
         });
     }
