@@ -72,6 +72,7 @@ export default class QueueCommand extends PublicCommand {
         const playerCache = PlayerCache.getInstance();
         const queueManager = QueueManager.getInstance();
         const player = playerCache.getPlayer(brawlId);
+
         if (player.team) {
             if (player.team.host == player) {
                 return await queueManager.addToQueue(pool, region, player.team);

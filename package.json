@@ -24,6 +24,7 @@
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "moment": "^2.29.1",
+    "nodeplotlib": "^0.7.3",
     "sqlite": "^4.0.19",
     "sqlite3": "^5.0.0",
     "sub-events": "^1.8.7",

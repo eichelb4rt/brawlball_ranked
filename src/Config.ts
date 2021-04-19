@@ -67,7 +67,7 @@ export default class Config {
 	// Queues
 	////////////////////////////////////////////////////////////////
 
-	static readonly queueWaitingTime = 30;	// time interval in seconds for refreshing match function
+	static readonly queueWaitingTime = 1;	// time interval in seconds for refreshing match function
 
 	static readonly regions = [
 		"NA",
@@ -84,7 +84,7 @@ export default class Config {
 	static readonly poolDir = "queues";
 	static readonly poolImplementationsDir = "pool_implementations";
 
-	static readonly match_evaluation_amplifier = 1 / 10;
+	static readonly match_evaluation_amplifier = 1 / 5;
 
 	////////////////////////////////////////////////////////////////
 	// Roles

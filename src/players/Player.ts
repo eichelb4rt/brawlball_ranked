@@ -128,6 +128,9 @@ export default class Player {
     }
 
     public get roles(): Role[] {
+        if (this._roles.length === 0) {
+            return Config.roles;    // if no roles are assigned, assign all the roles (if player isn't good at any role in particular, they're mediocre in everything)
+        }
         return this._roles;
     }
 
