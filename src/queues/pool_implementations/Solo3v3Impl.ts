@@ -13,7 +13,7 @@ export default class Solo3v3Impl extends Pool {
     readonly maxTeamSize = 3;
 
     private players: Player[];
-    private readonly min_fairness = -5;
+    private readonly min_fairness = Number.NEGATIVE_INFINITY;
 
     // these constraints have to be fulfilles for a match that is generated
     private readonly match_constraints: ((match: Match) => Promise<boolean>)[] = [

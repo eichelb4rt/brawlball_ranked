@@ -13,7 +13,7 @@ export default class Solo2v2Impl extends Pool {
     readonly maxTeamSize = 2;
 
     private players: Player[];
-    private readonly min_fairness = -5;
+    private readonly min_fairness = Number.NEGATIVE_INFINITY;
 
     // these constraints have to be fulfilles for a match that is generated
     private readonly match_constraints: ((match: Match) => Promise<boolean>)[] = [
