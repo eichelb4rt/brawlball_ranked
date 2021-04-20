@@ -4,3 +4,9 @@ export default interface Role {
     emoji: string;
     acceptable_names: string[];
 }
+
+export enum Roles {
+    Runner,
+    Support,
+    Defense
+}

@@ -84,7 +84,7 @@ export default class Config {
 	static readonly poolDir = "queues";
 	static readonly poolImplementationsDir = "pool_implementations";
 
-	static readonly match_evaluation_amplifier = 1 / 10;
+	static readonly match_evaluation_amplifier = 1 / 5;
 
 	////////////////////////////////////////////////////////////////
 	// Roles

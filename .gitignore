@@ -1,6 +1,11 @@
+# install and build folder
 node_modules/
 build/
-src/testing.ts
+# code editor
 **/.vscode/
+# log files
 **/*.log
+# env variables used for tokens
 .env
+# not unit or integration tests - just personal testing
+src/testing.ts

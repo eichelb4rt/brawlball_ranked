@@ -11,5 +11,5 @@ export default abstract class Pool {    // can't make properties static with an 
 
     abstract add(team: Team): void;
     abstract remove(players: Player[]): void;   // should remove every team that contains the players passed as argument
-    abstract getMatch(): Promise<Match | null>;
+    abstract getMatches(): AsyncGenerator<Match, void, void>;
 }

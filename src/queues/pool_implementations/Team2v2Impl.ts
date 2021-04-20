@@ -31,7 +31,16 @@ export default class Team2v2Impl extends Pool {
         }
     }
 
-    async getMatch(): Promise<Match | null> {
+    async *getMatches(): AsyncGenerator<Match, void, void> {
+        let match = await this.getMatch();
+        while (match) {
+            this.remove(match.players);
+            yield match;
+            match = await this.getMatch();
+        }
+    }
+
+    async getMatch(): Promise<Match | undefined> {
         if (this.players.length >= 2 * this.maxTeamSize) {
             // get a random set of players (2 teams)
             let players: Player[] = this.getRandom(this.players, 2 * this.maxTeamSize);
@@ -45,10 +54,10 @@ export default class Team2v2Impl extends Pool {
             for (let i = this.maxTeamSize; i < 2 * this.maxTeamSize; i++) {
                 teamB.join(players[i], JoinConfig.System);
             }
-            // return the found match
+            // remove players from pool and return the found match
             return new Match(teamA, teamB);
         }
-        return null;
+        return undefined;
     }
 
     private getRandom(arr: Player[], n: number): Player[] {

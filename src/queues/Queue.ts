@@ -24,7 +24,7 @@ export default class Queue {
         this.region = region;
         this.pool = PoolFactory.getInstance().newPool(blueprint.poolSystem);
         this.onMatchFound = new SubEvent<Match>();
-        this.startSearching();
+        //this.startSearching();
     }
 
     private startSearching() {
@@ -32,8 +32,7 @@ export default class Queue {
         // delete the players in the match from the pool
         // emit Match to subcribers
         setInterval(async () => {
-            let match: Match | null = await this.pool.getMatch();   // ask the Pool to find a Match
-            if (match) {
+            for await (const match of this.pool.getMatches()) { // ask the pool for matches
                 // remove match players from pool and queue
                 this.pool.remove(match.players);
                 this.onMatchFound.emit(match);    // return the match to subscribers
