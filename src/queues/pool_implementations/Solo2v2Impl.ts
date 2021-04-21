@@ -66,10 +66,11 @@ export default class Solo2v2Impl extends Pool {
 
     async *getMatches(): AsyncGenerator<Match, void, void> {
         // https://stackoverflow.com/questions/53119389/team-matchmaking-algorithm-based-on-elo/53246693
-        console.log(`Players in Pool: ${this.players.map(player => `ID: ${player.id}, Elo: ${player.elo}, Roles: ${player.roles.map(role => role.display_name)}`)}`);
+        console.log(`Players in Pool: ${this.players.map(player => `ID: ${player.id}, Elo: ${player.elo}, Roles: ${player.roles.map(role => role.display_name)}`).join('\n')}\n`);
         let matched_players: Player[] = [];
         for (const players of this.make_list4()) {
-            console.log(`Players in List4: ${players.map(player => `ID: ${player.id}, Elo: ${player.elo}, Roles: ${player.roles.map(role => role.display_name)}`)}`);
+            console.log(`Players already matched: ${matched_players.map(player => `ID: ${player.id}, Elo: ${player.elo}, Roles: ${player.roles.map(role => role.display_name)}`).join('\n')}\n`);
+            console.log(`Players in List4: ${players.map(player => `ID: ${player.id}, Elo: ${player.elo}, Roles: ${player.roles.map(role => role.display_name)}`).join('\n')}\n`);
             // sort players by elo
             function player_sort(player1: Player, player2: Player) {
                 if (player1.elo < player2.elo) return 1;
