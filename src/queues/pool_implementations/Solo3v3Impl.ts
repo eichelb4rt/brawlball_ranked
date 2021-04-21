@@ -24,14 +24,14 @@ export default class Solo3v3Impl extends Pool {
                 represented_roles_A = represented_roles_A.concat(player.roles);
             }
             if (!represented_roles_A.includes(Config.roles[Roles.Runner])) return false;
-            if (!represented_roles_A.includes(Config.roles[Roles.Support]) || !represented_roles_A.includes(Config.roles[Roles.Defense])) return false;
+            if (!represented_roles_A.includes(Config.roles[Roles.Support]) && !represented_roles_A.includes(Config.roles[Roles.Defense])) return false;
             // check team B
             let represented_roles_B: Role[] = [];
             for (const player of match.teamB.players) {
                 represented_roles_B = represented_roles_B.concat(player.roles);
             }
             if (!represented_roles_B.includes(Config.roles[Roles.Runner])) return false;
-            if (!represented_roles_B.includes(Config.roles[Roles.Support]) || !represented_roles_B.includes(Config.roles[Roles.Defense])) return false;
+            if (!represented_roles_B.includes(Config.roles[Roles.Support]) && !represented_roles_B.includes(Config.roles[Roles.Defense])) return false;
             // both checked, we're ok
             return true;
         },
