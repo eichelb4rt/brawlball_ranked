@@ -8,7 +8,7 @@ import ArgumentParser, { Arguments } from "../../ui/ArgumentParser";
 export default class Help extends PublicCommand {
     name: string = "help";
     short_description: string = "Help! It's a flying spaghetti monster!";
-    long_description: string = "Help! It's a flying spaghetti monster! ARRRRRe you in danger? Call 911!";
+    long_description: string = "Help! It's a flying spaghetti monster! ARRRRRe you in danger? Get off my ship you whining land rat!";
 
     private arg_parser: ArgumentParser;
     constructor() {
