@@ -5,6 +5,8 @@ import Team, { JoinConfig } from "../../players/Team";
 import PoolSystem from "../PoolSystem";
 import MinHeap, { HeapIndexable, MinHeapThatStoresIndexInObjects } from "../MinHeap";
 import Elo, { Score } from "../../matches/Elo";
+import Role, { Roles } from "../../players/Role";
+import Config from "../../Config";
 
 export default class Team2v2Impl extends Pool {
     static readonly poolSystem = PoolSystem.Team2v2;
@@ -17,16 +19,58 @@ export default class Team2v2Impl extends Pool {
     // they are stored in another array, inside a structure that makes them easily accessible in a heap
     // these structures are stored in a MinHeap to find the best possible game overall
     private players: Player[];
-    public possible_games_heaps: MinHeap<Player[]>[];
+    private possible_games_heaps: MinHeap<Player[]>[];
     private best_games: HeapIndexable<Player[]>[];
-    public best_games_heap: MinHeapThatStoresIndexInObjects<Player[], HeapIndexable<Player[]>>;
-    private readonly min_fairness = 20;
+    private best_games_heap: MinHeapThatStoresIndexInObjects<Player[], HeapIndexable<Player[]>>;
+    private readonly min_fairness = -5;
 
-    private readonly p = 2; // p parameter for team matchmaking algorithm
-    private readonly q = 2; // q parameter for team matchmaking
-    private readonly alpha = 1  // alpha parameter for team matchmaking
+    private readonly P = 2; // p parameter for team matchmaking algorithm
+    private readonly Q = 2; // q parameter for team matchmaking
+    private readonly ALPHA = 1 / 10  // alpha parameter for team matchmaking
 
-    private readonly best_game_range = 4 * (1 + this.alpha) * Math.pow(this.maxTeamSize, 1 + 1 / this.q);
+    private readonly best_game_range = 4 * (1 + this.ALPHA) * Math.pow(this.maxTeamSize, 1 + 1 / this.Q);
+
+    // these constraints have to be fulfilles for a match that is generated
+    private readonly match_constraints: ((match: Match) => boolean)[] = [
+        match => {  // enough roles represented
+            // check team A
+            let represented_roles_A: Role[] = [];
+            for (const player of match.teamA.players) {
+                represented_roles_A = represented_roles_A.concat(player.roles);
+            }
+            if (!represented_roles_A.includes(Config.roles[Roles.Runner])) return false;
+            if (!represented_roles_A.includes(Config.roles[Roles.Support]) && !represented_roles_A.includes(Config.roles[Roles.Defense])) return false;
+            // check team B
+            let represented_roles_B: Role[] = [];
+            for (const player of match.teamB.players) {
+                represented_roles_B = represented_roles_B.concat(player.roles);
+            }
+            if (!represented_roles_B.includes(Config.roles[Roles.Runner])) return false;
+            if (!represented_roles_B.includes(Config.roles[Roles.Support]) && !represented_roles_B.includes(Config.roles[Roles.Defense])) return false;
+            // both checked, we're ok
+            return true;
+        },
+        match => this.evaluate(match) >= this.min_fairness, // evaluation score high enough?
+        match => {
+            for (const match_team of [match.teamA, match.teamB]) {
+                // match_team = team a or match_team = team b   (just do the following for both teams)
+                for (const match_player of match_team.players) {
+                    // players in the team that the match has given us
+                    const player_team = match_player.team;  // does the player have a premade team?
+                    if (player_team) {
+                        // if yes, all of his premade team members have to be in his team in the found match.
+                        for (const team_player of player_team.players) {
+                            // if anyone of his premade team is not included, the match doesn't go through
+                            if (!match_team.players.includes(team_player)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+    ];
 
     constructor() {
         super();
@@ -84,7 +128,7 @@ export default class Team2v2Impl extends Pool {
         let match = await this.getMatch();
         while (match) {
             yield match;
-            this.remove(match.players);
+            await this.remove(match.players);
             match = await this.getMatch();
         }
     }
@@ -92,7 +136,6 @@ export default class Team2v2Impl extends Pool {
     async getMatch(): Promise<Match | undefined> {
         const players = this.best_games_heap.root;
         const match = players ? this.make_match(players) : undefined;
-        console.log(`Players:${players?.map(player => player.id)}\nA: ${match?.teamA.players.map(player => player.id)},\tB: ${match?.teamB.players.map(player => player.id)}`);
         return match;
     }
 
@@ -161,8 +204,8 @@ export default class Team2v2Impl extends Pool {
         // update the new best match (data changed in best games heap => data changed in best games array, since it only stores references)
         const new_best_match: Player[] = this.possible_games_heaps[index].root;
         const best_match_wrapper: HeapIndexable<Player[]> | null = this.best_games[index];
-        best_match_wrapper.data = new_best_match;
         this.best_games_heap.change_value(best_match_wrapper.heap_index, new_best_match);
+        best_match_wrapper.data = new_best_match;
     }
 
     private update_possible_matches(index: number) {
@@ -182,10 +225,24 @@ export default class Team2v2Impl extends Pool {
             for (const team_a of choose(this.maxTeamSize, players)) {
                 // select a team a and put team b as everyone who is not in team a
                 const team_b = players.filter(player => !team_a.includes(player));
-                // insert it into the heap
-                new_heap.insert(team_a.concat(team_b));
+                // make it into an ordered array of players
+                const ordered_players = team_a.concat(team_b);
+                // turn the players into a match
+                const match = this.make_match(ordered_players);
+                // check if it fulfills all the constraints
+                if (this.all_constraints_fulfilled(match)) {
+                    // insert it into the heap
+                    new_heap.insert(ordered_players);
+                }
             }
         }
+    }
+
+    private all_constraints_fulfilled(match: Match): boolean {
+        for (const constraint of this.match_constraints) {
+            if (!constraint(match)) return false;
+        }
+        return true;
     }
 
     private player_pos(player: Player): number {
@@ -200,19 +257,19 @@ export default class Team2v2Impl extends Pool {
         return low;
     }
 
-    public team_skill(players: Player[]): number {
+    private team_skill(players: Player[]): number {
         let sum = 0;
         for (const player of players) {
-            sum += Math.pow(player.elo, this.p);
+            sum += Math.pow(player.elo, this.P);
         }
-        return Math.pow(sum, 1 / this.p);
+        return Math.pow(sum, 1 / this.P);
     }
 
-    public skill_difference(team_a: Player[], team_b: Player[]): number {
+    private skill_difference(team_a: Player[], team_b: Player[]): number {
         return Math.abs(this.team_skill(team_a) - this.team_skill(team_b));
     }
 
-    public mean_skill(players: Player[]): number {
+    private mean_skill(players: Player[]): number {
         let sum = 0;
         for (const player of players) {
             sum += player.elo;
@@ -220,29 +277,25 @@ export default class Team2v2Impl extends Pool {
         return sum / players.length;
     }
 
-    public uniformity(players: Player[]): number {
+    private uniformity(players: Player[]): number {
         const mean = this.mean_skill(players);
         let sum = 0;
         for (const player of players) {
-            sum += Math.pow(Math.abs(player.elo - mean), this.q);
+            sum += Math.pow(Math.abs(player.elo - mean), this.Q);
         }
-        return Math.pow(sum / players.length, 1 / this.q);
+        return Math.pow(sum / players.length, 1 / this.Q);
     }
 
-    public imbalance_function_1(match_players: Player[] | undefined): number {
+    private evaluate(match: Match): number {
+        return -this.imbalance_function_2(match);
+    }
+
+    private imbalance_function(match_players: Player[] | undefined): number {
         if (!match_players) {
             return Number.POSITIVE_INFINITY;
         }
-        const team_a = match_players.slice(0, this.maxTeamSize - 1);
-        const team_b = match_players.slice(this.maxTeamSize, 2 * this.maxTeamSize - 1);
-        return this.alpha * this.skill_difference(team_a, team_b) + this.uniformity(team_a.concat(team_b));
-    }
-
-    public imbalance_function(match_players: Player[] | undefined): number {
-        if (!match_players) {
-            return Number.POSITIVE_INFINITY;
-        }
-        return this.evaluate_b(this.make_match(match_players));
+        const match = this.make_match(match_players);
+        return this.imbalance_function_1(match);
     }
 
     private make_match(match_players: Player[]): Match {
@@ -261,7 +314,11 @@ export default class Team2v2Impl extends Pool {
         return new Match(teamA, teamB);
     }
 
-    public evaluate_b(match: Match) {
+    private imbalance_function_1(match: Match): number {
+        return this.ALPHA * this.skill_difference(match.teamA.players, match.teamB.players) + this.uniformity(match.players);
+    }
+
+    private imbalance_function_2(match: Match) {
         // determine the actual scores
         let scoreA: Score = match.winnerToScore(match.teamA.players[0], Teams.TeamA);
         let scoreB: Score = match.winnerToScore(match.teamB.players[0], Teams.TeamB);
