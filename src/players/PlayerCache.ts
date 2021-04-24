@@ -23,11 +23,11 @@ export default class PlayerCache {
     }
 
     // gets a Player from the cache. If not cached, creates a new one from the DB.
-    public getPlayer(id: string): Player {
+    public async getPlayer(id: string): Promise<Player> {
         // look in the map if there is already a player with this id
         let player: Player | undefined = this.cache.get(id)
         if (!player) {   // if not, make a new player with the id and cache it
-            player = new Player(id);
+            player = await Player.build(id);
             this.cache.set(id, player);
             player.onEloChange.subscribe(async info => {
                 try {

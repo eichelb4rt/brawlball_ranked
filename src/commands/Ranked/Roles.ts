@@ -65,12 +65,11 @@ export default class Link extends PublicCommand {
 
         // get the player with the brawl id
         const player_cache = PlayerCache.getInstance();
-        const player = player_cache.getPlayer(brawl_id);
+        const player = await player_cache.getPlayer(brawl_id);
         if (chosen_roles.length === 0) {
             channel.send("You have not chosen new roles.");
             return;
         }
-        await player.setup();
         player.roles = chosen_roles;
 
         // confirm that they set the roles they wanted to set

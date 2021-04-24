@@ -85,7 +85,7 @@ export default class Invite extends PublicCommand {
         // process reaction
         if (first_reaction?.emoji.name == accept_emoji) {   // if the invitation was accepted
             try {
-                this.accept_invitation(inviting_brawl_id, invited_brawl_id);
+                await this.accept_invitation(inviting_brawl_id, invited_brawl_id);
                 channel.send("Invitation accepted.");
             } catch (e) {
                 channel.send(e.message);
@@ -97,11 +97,11 @@ export default class Invite extends PublicCommand {
         }
     }
 
-    accept_invitation(inviting_id: string, invited_id: string) {
+    async accept_invitation(inviting_id: string, invited_id: string) {
         // get players
         const player_cache = PlayerCache.getInstance();
-        let inviting_player = player_cache.getPlayer(inviting_id);
-        let invited_player = player_cache.getPlayer(invited_id);
+        let inviting_player = await player_cache.getPlayer(inviting_id);
+        let invited_player = await player_cache.getPlayer(invited_id);
 
         // if the inviting player was not in a team before, create one
         let team = inviting_player.team;

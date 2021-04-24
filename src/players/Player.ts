@@ -18,25 +18,22 @@ export default class Player {
     public elo_map: Map<QueueBlueprint, number>;
     public _roles: Role[];
     public team: Team | undefined;
-    private _setup: boolean;    // true if everything is setup (waited for db elo and stuff)
+    public built: boolean;
 
-    constructor(id: string) {
+    private constructor(id: string) {
         this.id = id;
         this.elo_map = new Map();
         this._roles = [];
-        this._setup = false;
         this.onEloChange = new SubEvent<EloChangeInfo>();
-        this.setup();
+        this.built = false;
     }
 
-    public async setup() {
-        // await player.setup() to use elo stuff
-        // this can be "locked" this way because js is event-loop concurrent
-        if (!this._setup) {
-            await this.readRolesFromDB();
-            await this.readEloFromDB();
-            this._setup = true
-        }
+    public static async build(id: string): Promise<Player> {
+        const player = new Player(id);
+        await player.readRolesFromDB();
+        await player.readEloFromDB();
+        player.built = true;
+        return player;
     }
 
     public async notify(msg_content: any) {

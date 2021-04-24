@@ -64,18 +64,18 @@ export default class Kick extends PublicCommand {
 
         // try to kick the guy
         try {
-            this.kick(kicking_brawl_id, kicked_brawl_id);
+            await this.kick(kicking_brawl_id, kicked_brawl_id);
             channel.send(`<@${kicked_discord_id}> was kicked from your team.`);
         } catch (e) {
             channel.send(e.message);
         }
     }
 
-    kick(kicking_id: string, kicked_id: string) {
+    async kick(kicking_id: string, kicked_id: string) {
         // get players
         const player_cache = PlayerCache.getInstance();
-        let kicking_player = player_cache.getPlayer(kicking_id);
-        let kicked_player = player_cache.getPlayer(kicked_id);
+        let kicking_player = await player_cache.getPlayer(kicking_id);
+        let kicked_player = await player_cache.getPlayer(kicked_id);
 
         // check if the player can even be kicked and permissions and stuff
         let team = kicking_player.team;

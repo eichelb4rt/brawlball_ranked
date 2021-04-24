@@ -33,7 +33,7 @@ export default class Abort extends PublicCommand {
     async abort(brawlId: string) {
         const playerCache = PlayerCache.getInstance();
         const queueManager = QueueManager.getInstance();
-        const player = playerCache.getPlayer(brawlId);
+        const player = await playerCache.getPlayer(brawlId);
         if (player.team) {
             return queueManager.abortQueue(player.team);
         } else {

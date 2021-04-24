@@ -52,8 +52,7 @@ export default class Info extends PublicCommand {
 
         // get the player
         const player_cache = PlayerCache.getInstance();
-        const player = player_cache.getPlayer(brawl_id);
-        await player.setup();   // before we do anything with the elo, we need to wait for the setup
+        const player = await player_cache.getPlayer(brawl_id);
 
         // get the role
         let roles_str = "";
