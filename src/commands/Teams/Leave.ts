@@ -24,7 +24,7 @@ export default class Leave extends PublicCommand {
 
         // get player and team
         const player_cache = PlayerCache.getInstance();
-        let player = player_cache.getPlayer(brawl_id);
+        let player = await player_cache.getPlayer(brawl_id);
         let team = player.team;
 
         // correct usage

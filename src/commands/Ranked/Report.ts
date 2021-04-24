@@ -49,7 +49,7 @@ export default class Link extends PublicCommand {
 
         // get the player with the brawl id
         const player_cache = PlayerCache.getInstance();
-        const reporting_player = player_cache.getPlayer(brawl_id);
+        const reporting_player = await player_cache.getPlayer(brawl_id);
 
         // make sure the match being reported actually exists
         const match = reporting_player.match;

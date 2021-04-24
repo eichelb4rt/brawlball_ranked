@@ -71,7 +71,7 @@ export default class QueueCommand extends PublicCommand {
     private async queue(brawlId: string, pool: string, region: string) {
         const playerCache = PlayerCache.getInstance();
         const queueManager = QueueManager.getInstance();
-        const player = playerCache.getPlayer(brawlId);
+        const player = await playerCache.getPlayer(brawlId);
 
         if (player.team) {
             if (player.team.host == player) {

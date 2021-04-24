@@ -25,7 +25,7 @@ export default class TeamCommand extends PublicCommand {
 
         // get the player
         const player_cache = PlayerCache.getInstance();
-        let player = player_cache.getPlayer(brawl_id);
+        let player = await player_cache.getPlayer(brawl_id);
         let team = player.team;
 
         // build the string holding the team members

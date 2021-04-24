@@ -50,13 +50,13 @@ export default class Solo2v2Impl extends Pool {
         this.players = [];
     }
 
-    add(team: Team): void {
+    async add(team: Team): Promise<void> {
         for (let player of team.players) {
             this.players.push(player);
         }
     }
 
-    remove(players: Player[]): void {
+    async remove(players: Player[]): Promise<void> {
         // should remove every team that contains the players passed as argument
         for (let player of players) {
             let index = this.players.indexOf(player);
@@ -161,10 +161,6 @@ export default class Solo2v2Impl extends Pool {
     }
 
     async evaluate(match: Match) {
-        for (let player of match.players) {
-            await player.setup();
-        }
-    
         // determine the actual scores
         let scoreA: Score = match.winnerToScore(match.teamA.players[0], Teams.TeamA);
         let scoreB: Score = match.winnerToScore(match.teamB.players[0], Teams.TeamB);

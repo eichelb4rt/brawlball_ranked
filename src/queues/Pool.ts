@@ -9,7 +9,7 @@ export default abstract class Pool {    // can't make properties static with an 
     abstract readonly maxPremadeSize: number;
     abstract readonly maxTeamSize: number;
 
-    abstract add(team: Team): void;
-    abstract remove(players: Player[]): void;   // should remove every team that contains the players passed as argument
+    abstract add(team: Team): Promise<void>;
+    abstract remove(players: Player[]): Promise<void>;   // should remove every team that contains the players passed as argument
     abstract getMatches(): AsyncGenerator<Match, void, void>;
 }

@@ -17,13 +17,13 @@ export default class Team3v3Impl extends Pool {
         this.players = [];
     }
 
-    add(team: Team): void {
+    async add(team: Team): Promise<void> {
         for (let player of team.players) {
             this.players.push(player);
         }
     }
 
-    remove(players: Player[]): void {
+    async remove(players: Player[]): Promise<void> {
         // should remove every team that contains the players passed as argument
         for (let player of players) {
             let index = this.players.indexOf(player);
