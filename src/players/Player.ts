@@ -18,18 +18,21 @@ export default class Player {
     public elo_map: Map<QueueBlueprint, number>;
     public _roles: Role[];
     public team: Team | undefined;
+    public built: boolean;
 
     private constructor(id: string) {
         this.id = id;
         this.elo_map = new Map();
         this._roles = [];
         this.onEloChange = new SubEvent<EloChangeInfo>();
+        this.built = false;
     }
 
     public static async build(id: string): Promise<Player> {
         const player = new Player(id);
         await player.readRolesFromDB();
         await player.readEloFromDB();
+        player.built = true;
         return player;
     }
 

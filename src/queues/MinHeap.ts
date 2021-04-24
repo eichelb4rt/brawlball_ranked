@@ -58,13 +58,11 @@ export default class MinHeap<T> {
     protected heapify(i: number) {
         const l = this.left(i);
         const r = this.right(i);
-        let min: number;
-        if (l < this.heapsize && this.lt(this.arr[l], this.arr[i])) {    // l < i
+        let min: number = i;
+        if (l < this.heapsize && this.lt(this.arr[l], this.arr[min])) {    // l < i
             min = l;
-        } else {
-            min = i;
         }
-        if (r < this.heapsize && this.lt(this.arr[r], this.arr[i])) {    // r < i
+        if (r < this.heapsize && this.lt(this.arr[r], this.arr[min])) {    // r < i
             min = r;
         }
         if (min !== i) {
@@ -193,13 +191,11 @@ export class MinHeapThatStoresIndexInObjects<T, K extends HeapIndexable<T>> {
     protected heapify(i: number) {
         const l = this.left(i);
         const r = this.right(i);
-        let min: number;
-        if (l < this.heapsize && this.lt(this.arr[l].data, this.arr[i].data)) {    // l < i
+        let min: number = i;
+        if (l < this.heapsize && this.lt(this.arr[l].data, this.arr[min].data)) {    // l < i
             min = l;
-        } else {
-            min = i;
         }
-        if (r < this.heapsize && this.lt(this.arr[r].data, this.arr[i].data)) {    // r < i
+        if (r < this.heapsize && this.lt(this.arr[r].data, this.arr[min].data)) {    // r < i
             min = r;
         }
         if (min !== i) {

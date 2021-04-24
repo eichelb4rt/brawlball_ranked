@@ -17,9 +17,9 @@ export default class Team2v2Impl extends Pool {
     // they are stored in another array, inside a structure that makes them easily accessible in a heap
     // these structures are stored in a MinHeap to find the best possible game overall
     private players: Player[];
-    private possible_games_heaps: MinHeap<Player[]>[];
+    public possible_games_heaps: MinHeap<Player[]>[];
     private best_games: HeapIndexable<Player[]>[];
-    private best_games_heap: MinHeapThatStoresIndexInObjects<Player[], HeapIndexable<Player[]>>;
+    public best_games_heap: MinHeapThatStoresIndexInObjects<Player[], HeapIndexable<Player[]>>;
     private readonly min_fairness = 20;
 
     private readonly p = 2; // p parameter for team matchmaking algorithm
@@ -83,29 +83,17 @@ export default class Team2v2Impl extends Pool {
     async *getMatches(): AsyncGenerator<Match, void, void> {
         let match = await this.getMatch();
         while (match) {
-            this.remove(match.players);
             yield match;
+            this.remove(match.players);
             match = await this.getMatch();
         }
     }
 
     async getMatch(): Promise<Match | undefined> {
         const players = this.best_games_heap.root;
-        if (!players) {
-            return undefined;
-        }
-        // put the first half in team a
-        let teamA: Team = new Team();
-        for (let i = 0; i < this.maxTeamSize; i++) {
-            teamA.join(players[i], JoinConfig.System);
-        }
-        // put the second half in team b
-        let teamB: Team = new Team();
-        for (let i = this.maxTeamSize; i < 2 * this.maxTeamSize; i++) {
-            teamB.join(players[i], JoinConfig.System);
-        }
-        // remove players from pool and return the found match
-        return new Match(teamA, teamB);
+        const match = players ? this.make_match(players) : undefined;
+        console.log(`Players:${players?.map(player => player.id)}\nA: ${match?.teamA.players.map(player => player.id)},\tB: ${match?.teamB.players.map(player => player.id)}`);
+        return match;
     }
 
     private find_player(player: Player): number {
@@ -148,27 +136,8 @@ export default class Team2v2Impl extends Pool {
 
     private heap_order(match_a: Player[] | undefined, match_b: Player[] | undefined, self: this = this): number {
         // orders matches
-        let score_a: number;
-        if (match_a) {
-            // first k players are team_1, last k players are team 2
-            const team_1 = match_a.slice(0, this.maxTeamSize - 1);
-            const team_2 = match_a.slice(this.maxTeamSize, 2 * this.maxTeamSize - 1);
-            // calc imbalance
-            score_a = self.imbalance_function(team_1, team_2);
-        } else {
-            score_a = Number.POSITIVE_INFINITY;
-        }
-        // same for "match" b
-        let score_b: number;
-        if (match_b) {
-            // first k players are team_1, last k players are team 2
-            const team_1 = match_b.slice(0, this.maxTeamSize - 1);
-            const team_2 = match_b.slice(this.maxTeamSize, 2 * this.maxTeamSize - 1);
-            // calc imbalance
-            score_b = self.imbalance_function(team_1, team_2);
-        } else {
-            score_b = Number.POSITIVE_INFINITY;
-        }
+        const score_a = self.imbalance_function(match_a);
+        const score_b = self.imbalance_function(match_b);
         // compare imbalances
         if (score_a > score_b) return 1;
         if (score_a < score_b) return -1;
@@ -260,11 +229,26 @@ export default class Team2v2Impl extends Pool {
         return Math.pow(sum / players.length, 1 / this.q);
     }
 
-    public imbalance_function_1(team_a: Player[], team_b: Player[]) {
+    public imbalance_function_1(match_players: Player[] | undefined): number {
+        if (!match_players) {
+            return Number.POSITIVE_INFINITY;
+        }
+        const team_a = match_players.slice(0, this.maxTeamSize - 1);
+        const team_b = match_players.slice(this.maxTeamSize, 2 * this.maxTeamSize - 1);
         return this.alpha * this.skill_difference(team_a, team_b) + this.uniformity(team_a.concat(team_b));
     }
 
-    public imbalance_function(team_a: Player[], team_b: Player[]) {
+    public imbalance_function(match_players: Player[] | undefined): number {
+        if (!match_players) {
+            return Number.POSITIVE_INFINITY;
+        }
+        return this.evaluate_b(this.make_match(match_players));
+    }
+
+    private make_match(match_players: Player[]): Match {
+        const team_a = match_players.slice(0, this.maxTeamSize);
+        const team_b = match_players.slice(this.maxTeamSize, 2 * this.maxTeamSize);
+
         let teamA: Team = new Team();
         for (let player of team_a) {
             teamA.join(player, JoinConfig.System);
@@ -274,7 +258,10 @@ export default class Team2v2Impl extends Pool {
         for (let player of team_b) {
             teamB.join(player, JoinConfig.System);
         }
-        const match = new Match(teamA, teamB);
+        return new Match(teamA, teamB);
+    }
+
+    public evaluate_b(match: Match) {
         // determine the actual scores
         let scoreA: Score = match.winnerToScore(match.teamA.players[0], Teams.TeamA);
         let scoreB: Score = match.winnerToScore(match.teamB.players[0], Teams.TeamB);
