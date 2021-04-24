@@ -1,9 +1,10 @@
-import Match from "../../matches/Match";
+import Match, { Teams } from "../../matches/Match";
 import Player from "../../players/Player";
 import Pool from "../Pool";
 import Team, { JoinConfig } from "../../players/Team";
 import PoolSystem from "../PoolSystem";
 import MinHeap, { HeapIndexable, MinHeapThatStoresIndexInObjects } from "../MinHeap";
+import Elo, { Score } from "../../matches/Elo";
 
 export default class Team2v2Impl extends Pool {
     static readonly poolSystem = PoolSystem.Team2v2;
@@ -51,7 +52,7 @@ export default class Team2v2Impl extends Pool {
             this.best_games.splice(pos, 0, { data: best_game, heap_index: 0 });
             // insert the best game for the new player into the best games heap
             const best_game_wrapper = this.best_games[pos];
-            this.update_best_games(pos, best_game_wrapper, null);
+            this.best_games_heap.insert(best_game_wrapper);
             // update possible games, best games, and the best games heap for all the players that might have been affected by that insertion
             this.update(pos);
         }
@@ -59,12 +60,10 @@ export default class Team2v2Impl extends Pool {
 
     async remove(players: Player[]): Promise<void> {
         // should remove every team that contains the players passed as argument
-        console.log(this.players.map(player => player.elo));
         for (const player of players) {
             // find the player
             const pos = this.find_player(player);
             if (pos === -1) {
-                console.log("DIDN'T FIND THE GUY");
                 continue;   // if we didn't find the player, just continue with the next one
             }
             // ok we found the player.
@@ -75,7 +74,7 @@ export default class Team2v2Impl extends Pool {
             // remove the best possible game from the best games array and best games heap
             const best_game = this.best_games[pos];
             this.best_games.splice(pos, 1);
-            this.update_best_games(pos, null, best_game);
+            this.best_games_heap.delete(best_game.heap_index);
             // update possible games, best games, and the best games heap for all the players that might have been affected by that insertion
             this.update(pos);
         }
@@ -116,9 +115,8 @@ export default class Team2v2Impl extends Pool {
         }
         // now because there can be multiple players with the same elo, we have to search for the right player.
         // first go to the start of the players with the same elo
-        for (let i = pos; i >= 0; --i) {
-            if (this.players[i].elo !== player.elo) {
-                pos = i;
+        for (pos; pos >= 0; --pos) {
+            if (this.players[pos].elo !== player.elo) {
                 break;
             }
         }
@@ -148,18 +146,29 @@ export default class Team2v2Impl extends Pool {
         return -1;
     }
 
-    private heap_order(match_a: Player[], match_b: Player[], self: this = this): number {
+    private heap_order(match_a: Player[] | undefined, match_b: Player[] | undefined, self: this = this): number {
         // orders matches
-        // first k players are team_1, last k players are team 2
-        const team_a1 = match_a.slice(0, this.maxTeamSize - 1);
-        const team_a2 = match_a.slice(this.maxTeamSize, 2 * this.maxTeamSize - 1);
-        // calc imbalance
-        const score_a = self.imbalance_function(team_a1, team_a2);
+        let score_a: number;
+        if (match_a) {
+            // first k players are team_1, last k players are team 2
+            const team_1 = match_a.slice(0, this.maxTeamSize - 1);
+            const team_2 = match_a.slice(this.maxTeamSize, 2 * this.maxTeamSize - 1);
+            // calc imbalance
+            score_a = self.imbalance_function(team_1, team_2);
+        } else {
+            score_a = Number.POSITIVE_INFINITY;
+        }
         // same for "match" b
-        const team_b1 = match_b.slice(0, this.maxTeamSize - 1);
-        const team_b2 = match_b.slice(this.maxTeamSize, 2 * this.maxTeamSize - 1);
-        // calc imbalance
-        const score_b = self.imbalance_function(team_b1, team_b2);
+        let score_b: number;
+        if (match_b) {
+            // first k players are team_1, last k players are team 2
+            const team_1 = match_b.slice(0, this.maxTeamSize - 1);
+            const team_2 = match_b.slice(this.maxTeamSize, 2 * this.maxTeamSize - 1);
+            // calc imbalance
+            score_b = self.imbalance_function(team_1, team_2);
+        } else {
+            score_b = Number.POSITIVE_INFINITY;
+        }
         // compare imbalances
         if (score_a > score_b) return 1;
         if (score_a < score_b) return -1;
@@ -179,25 +188,12 @@ export default class Team2v2Impl extends Pool {
         this.update_best_games(index);
     }
 
-    private update_best_games(index: number, new_best_match_wrapper: HeapIndexable<Player[]> | null = { data: this.possible_games_heaps[index].root, heap_index: 0 }, old_best_match_wrapper: HeapIndexable<Player[]> | null = this.best_games[index]) {
+    private update_best_games(index: number) {
         // update the new best match (data changed in best games heap => data changed in best games array, since it only stores references)
-        if (new_best_match_wrapper?.data) {
-            if (old_best_match_wrapper?.data) {
-                // new match was found, there was also an old match before
-                this.best_games_heap.change_value(old_best_match_wrapper.heap_index, new_best_match_wrapper.data);
-            } else {
-                // new match was found, there was no old match before
-                this.best_games_heap.insert(new_best_match_wrapper);
-            }
-        } else {
-            if (old_best_match_wrapper?.data) {
-                // no new match was found, but there was an old match before
-                this.best_games_heap.delete(old_best_match_wrapper.heap_index);
-            }
-        }
-        if (new_best_match_wrapper) {
-            this.best_games[index] = new_best_match_wrapper;
-        }
+        const new_best_match: Player[] = this.possible_games_heaps[index].root;
+        const best_match_wrapper: HeapIndexable<Player[]> | null = this.best_games[index];
+        best_match_wrapper.data = new_best_match;
+        this.best_games_heap.change_value(best_match_wrapper.heap_index, new_best_match);
     }
 
     private update_possible_matches(index: number) {
@@ -264,8 +260,47 @@ export default class Team2v2Impl extends Pool {
         return Math.pow(sum / players.length, 1 / this.q);
     }
 
-    public imbalance_function(team_a: Player[], team_b: Player[]) {
+    public imbalance_function_1(team_a: Player[], team_b: Player[]) {
         return this.alpha * this.skill_difference(team_a, team_b) + this.uniformity(team_a.concat(team_b));
+    }
+
+    public imbalance_function(team_a: Player[], team_b: Player[]) {
+        let teamA: Team = new Team();
+        for (let player of team_a) {
+            teamA.join(player, JoinConfig.System);
+        }
+        // put the second half in team b
+        let teamB: Team = new Team();
+        for (let player of team_b) {
+            teamB.join(player, JoinConfig.System);
+        }
+        const match = new Match(teamA, teamB);
+        // determine the actual scores
+        let scoreA: Score = match.winnerToScore(match.teamA.players[0], Teams.TeamA);
+        let scoreB: Score = match.winnerToScore(match.teamB.players[0], Teams.TeamB);
+    
+        // calculate the average elo of every team for the expected scores
+        let avgEloA: number = match.teamA.averageElo();
+        let avgEloB: number = match.teamB.averageElo();
+    
+        // start avg elo gain calc
+        let elo_gain_a = 0;
+        let elo_gain_b = 0;
+    
+        // calculate the expected scores for every player (calculated with average enemy elo) and update elo
+        match.teamA.players.forEach(player => {
+            // calculated as if every player in team A fought against the average of team B
+            let expScore = Elo.expectedScore(player.elo, avgEloB);
+            let newElo = Elo.newElo(player, scoreA, expScore);
+            elo_gain_a += newElo - player.elo;
+        });
+        match.teamB.players.forEach(player => {
+            // calculated as if every player in team B fought against the average of team A
+            let expScore = Elo.expectedScore(player.elo, avgEloA);
+            let newElo = Elo.newElo(player, scoreB, expScore);
+            elo_gain_b += newElo - player.elo;
+        });
+        return Math.abs(elo_gain_a - elo_gain_b);
     }
 }
 
