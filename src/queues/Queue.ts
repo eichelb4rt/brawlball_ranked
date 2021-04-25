@@ -24,7 +24,7 @@ export default class Queue {
         this.region = region;
         this.pool = PoolFactory.getInstance().newPool(blueprint.poolSystem);
         this.onMatchFound = new SubEvent<Match>();
-        // this.startSearching();
+        this.startSearching();
     }
 
     private startSearching() {
