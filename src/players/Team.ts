@@ -59,6 +59,19 @@ export default class Team {
         if (config != JoinConfig.System) {
             player.team = this;
         }
+
+        // abort the queue if team is changed by sth other than system
+        if (config == JoinConfig.Weak || config == JoinConfig.Strong) {
+            const queueManager = QueueManager.getInstance();
+            if (this.queue)
+                queueManager.abortQueue(this);
+            
+            for (const team_player of this.players) {
+                if (team_player.queue) {
+                    queueManager.abortSoloQueue(team_player);
+                }
+            }
+        }
     }
 
     public kick(player: Player) {

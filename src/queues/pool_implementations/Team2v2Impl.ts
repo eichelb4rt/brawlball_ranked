@@ -22,7 +22,7 @@ export default class Team2v2Impl extends Pool {
     private possible_games_heaps: MinHeap<Player[]>[];
     private best_games: HeapIndexable<Player[]>[];
     private best_games_heap: MinHeapThatStoresIndexInObjects<Player[], HeapIndexable<Player[]>>;
-    private readonly min_fairness = -5;
+    private readonly min_fairness = -40;
 
     private readonly P = 2; // p parameter for team matchmaking algorithm
     private readonly Q = 2; // q parameter for team matchmaking
@@ -50,7 +50,10 @@ export default class Team2v2Impl extends Pool {
             // both checked, we're ok
             return true;
         },
-        match => this.evaluate(match) >= this.min_fairness, // evaluation score high enough?
+        match => {
+            console.log(this.evaluate(match));
+            return this.evaluate(match) >= this.min_fairness;
+        }, // evaluation score high enough?
         match => {
             for (const match_team of [match.teamA, match.teamB]) {
                 // match_team = team a or match_team = team b   (just do the following for both teams)
@@ -239,7 +242,9 @@ export default class Team2v2Impl extends Pool {
     }
 
     private all_constraints_fulfilled(match: Match): boolean {
+        console.log("\nTesting constraints: ");
         for (const constraint of this.match_constraints) {
+            console.log(constraint(match));
             if (!constraint(match)) return false;
         }
         return true;
@@ -287,7 +292,7 @@ export default class Team2v2Impl extends Pool {
     }
 
     private evaluate(match: Match): number {
-        return -this.imbalance_function_2(match);
+        return -this.imbalance_function_1(match);
     }
 
     private imbalance_function(match_players: Player[] | undefined): number {

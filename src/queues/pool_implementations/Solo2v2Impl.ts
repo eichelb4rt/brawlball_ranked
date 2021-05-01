@@ -22,7 +22,7 @@ export default class Solo2v2Impl extends Pool {
     private possible_games_heaps: MinHeap<Player[]>[];
     private best_games: HeapIndexable<Player[]>[];
     private best_games_heap: MinHeapThatStoresIndexInObjects<Player[], HeapIndexable<Player[]>>;
-    private readonly min_fairness = -5;
+    private readonly min_fairness = -40;
 
     private readonly P = 2; // p parameter for team matchmaking algorithm
     private readonly Q = 2; // q parameter for team matchmaking
@@ -268,7 +268,7 @@ export default class Solo2v2Impl extends Pool {
     }
 
     private evaluate(match: Match): number {
-        return -this.imbalance_function_2(match);
+        return -this.imbalance_function_1(match);
     }
 
     private imbalance_function(match_players: Player[] | undefined): number {
