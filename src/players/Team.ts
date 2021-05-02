@@ -53,32 +53,44 @@ export default class Team {
             }
         }
 
+        // abort all queues if something changes
+        const queueManager = QueueManager.getInstance();
+        if (config == JoinConfig.Weak || config == JoinConfig.Strong) {
+            // abort team queue
+            if (this.queue) {
+                queueManager.abortQueue(this);
+                for (const team_player of this.players) {
+                    team_player.notify("Your queue was cancelled because your team changed.");
+                }
+            }
+            // abort the joining player'S queue
+            if (player.queue) {
+                player.notify("Your queue was cancelled because you joined a new team.");
+            }
+        }
+
         // everything went alright
         this.players.push(player);
         // only if the player wanted to join by himself, it will be set to be his team
         if (config != JoinConfig.System) {
             player.team = this;
         }
-
-        // abort the queue if team is changed by sth other than system
-        if (config == JoinConfig.Weak || config == JoinConfig.Strong) {
-            const queueManager = QueueManager.getInstance();
-            if (this.queue)
-                queueManager.abortQueue(this);
-            
-            for (const team_player of this.players) {
-                if (team_player.queue) {
-                    queueManager.abortSoloQueue(team_player);
-                }
-            }
-        }
     }
 
     public kick(player: Player) {
-        // if the team is in a queue, abort the queue
-        let queueManager: QueueManager = QueueManager.getInstance();
-        if (this.queue)
+        // abort all queues if something changes
+        const queueManager = QueueManager.getInstance();
+        // abort team queue - we don't need to abort the player's queue because he's still part of the team
+        if (this.queue) {
             queueManager.abortQueue(this);
+            for (const team_player of this.players) {
+                if (team_player.id === player.id) {
+                    team_player.notify("Your queue was cancelled because you left your team.");
+                } else {
+                    team_player.notify("Your queue was cancelled because your team changed.");
+                }
+            }
+        }
         // now remove the player from the team
         const index = this.players.indexOf(player);
         if (index > -1) {
@@ -90,6 +102,10 @@ export default class Team {
             if (this.players.length > 0) {
                 this.host = this.players[0];
             }
+        }
+        // if only 1 player is left, the team can be deleted.
+        if (this.players.length === 1) {
+            this.kick(this.players[0]);
         }
     }
 
