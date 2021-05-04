@@ -8,6 +8,7 @@
 - clone repository
 - `npm install`
 - insert `.env` (template: `.env-template`)
+- insert `src/db/elo.db` (skeleton: `src/db/elo.db`)
 - `npm run build`
 - `npm start`
 

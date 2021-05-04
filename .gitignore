@@ -9,3 +9,5 @@ build/
 .env
 # not unit or integration tests - just personal testing
 src/testing.ts
+# the db with the values in it and stuff
+src/db/elo.db

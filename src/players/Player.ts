@@ -6,13 +6,12 @@ import DBManager, { DBPlayer } from "../db/DBManager";
 import Team from "./Team";
 import { QueuedMatch } from "../matches/Match";
 import { client } from "../main";
-import { User } from "discord.js";
+import { MessageEmbed, User } from "discord.js";
 import QueueBlueprint from "../queues/QueueBlueprint";
 import Role from "./Role";
 
 export default class Player {
     public readonly id: string; // brawl id
-    public readonly onEloChange: SubEvent<EloChangeInfo>;  // emits whenever player elo changes
     public _queue: Queue | undefined;    // Queue that the player is searching for match in
     private _match: QueuedMatch | undefined;  // Match that the player is fighting in
     public elo_map: Map<QueueBlueprint, number>;
@@ -24,7 +23,6 @@ export default class Player {
         this.id = id;
         this.elo_map = new Map();
         this._roles = [];
-        this.onEloChange = new SubEvent<EloChangeInfo>();
         this.built = false;
     }
 
@@ -164,14 +162,24 @@ export default class Player {
                 oldElo = Config.eloOnStart;
             this.elo_map.set(queue.blueprint, elo);
             this.updateEloInDB(queue);
-            const elo_change_info: EloChangeInfo = {
-                queue_name: queue.blueprint.displayName,
-                old_elo: oldElo,
-                new_elo: elo,
-                elo_diff: elo - oldElo,
-            }
-            this.onEloChange.emit(elo_change_info);
+            this.notify(this.onEloChangeEmbed(queue.blueprint.displayName, oldElo, elo))
+            .catch (err => console.log(`Could not message player with id ${this.id}.`));
         }
+    }
+
+    private onEloChangeEmbed(queue_name: string, old_elo: number, new_elo: number): MessageEmbed {
+        const elo_diff_value = new_elo - old_elo;
+        const elo_diff_str: string = elo_diff_value >= 0 ? `+${elo_diff_value}` : `${elo_diff_value}`;
+        const embed = new MessageEmbed()
+            .setTitle('Your elo changed')
+            .setColor(Config.embed_colour)
+            .addField('Old Elo', `${old_elo} (${Elo.elo_to_rank(old_elo)})`, true)
+            .addField('New Elo', `${new_elo} (${Elo.elo_to_rank(old_elo)}) (${elo_diff_str})`, true);
+        if (Elo.elo_to_rank(old_elo) != Elo.elo_to_rank(new_elo)) {
+            const description = elo_diff_value > 0 ? "You ranked up!" : "You downranked.";
+            embed.setDescription(description);
+        }
+        return embed;
     }
 
     public set queue(queue: Queue | undefined) {    // does not include them actually joining the pool
@@ -235,11 +243,4 @@ export default class Player {
             throw new Error(`Player with Brawlhalla id ${this.id} not found.`);
         return discord_id_row.DiscordID;
     }
-}
-
-export interface EloChangeInfo {
-    queue_name: string;
-    old_elo: number;
-    new_elo: number;
-    elo_diff: number;
 }
