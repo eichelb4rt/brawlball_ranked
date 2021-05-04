@@ -1,7 +1,7 @@
 {
-  "name": "fsrinfo_discord_bot",
+  "name": "brawlball_ranked",
   "version": "1.0.0",
-  "description": "Make Discord Great Again",
+  "description": "A Discord Bot providing a matchmaking system specifically for Brawlball, a Brawlhalla gamemode.",
   "main": "main.js",
   "scripts": {
     "build": "tsc",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eichelb4rt/fsrinfo_discord_bot.git"
+    "url": "git+https://github.com/eichelb4rt/brawlball_ranked.git"
   },
-  "author": "FSR Informatik @FSU Jena",
+  "author": "Maurice Wenig",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/eichelb4rt/fsrinfo_discord_bot/issues"
+    "url": "https://github.com/eichelb4rt/brawlball_ranked/issues"
   },
-  "homepage": "https://github.com/eichelb4rt/fsrinfo_discord_bot#readme",
+  "homepage": "https://github.com/eichelb4rt/brawlball_ranked#readme",
   "dependencies": {
     "axios": "^0.21.1",
     "discord.js": "^12.2.0",
