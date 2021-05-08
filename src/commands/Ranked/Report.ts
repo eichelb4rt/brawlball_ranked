@@ -88,11 +88,11 @@ export default class Link extends PublicCommand {
 
         let args = this.arg_parser.parse_arguments(msg.content);
         if (args.result) {
-            if (strings_for_win.map(str => str.toLowerCase()).includes(args.result)) {
+            if (strings_for_win.map(str => str.toLowerCase()).includes(args.result.toLowerCase())) {
                 return Score.Win;
-            } else if (strings_for_draw.map(str => str.toLowerCase()).includes(args.result)) {
+            } else if (strings_for_draw.map(str => str.toLowerCase()).includes(args.result.toLowerCase())) {
                 return Score.Draw;
-            } else if (strings_for_loss.map(str => str.toLowerCase()).includes(args.result)) {
+            } else if (strings_for_loss.map(str => str.toLowerCase()).includes(args.result.toLowerCase())) {
                 return Score.Loss;
             } else {
                 throw new Error(`${args.result} is not a valid match result.`);
