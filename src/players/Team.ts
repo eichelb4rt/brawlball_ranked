@@ -63,8 +63,9 @@ export default class Team {
                     team_player.notify("Your queue was cancelled because your team changed.");
                 }
             }
-            // abort the joining player'S queue
+            // abort the joining player's queue
             if (player.queue) {
+                queueManager.abortSoloQueue(player);
                 player.notify("Your queue was cancelled because you joined a new team.");
             }
         }
