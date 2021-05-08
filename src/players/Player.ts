@@ -174,7 +174,7 @@ export default class Player {
             .setTitle('Your elo changed')
             .setColor(Config.embed_colour)
             .addField('Old Elo', `${old_elo} (${Elo.elo_to_rank(old_elo)})`, true)
-            .addField('New Elo', `${new_elo} (${Elo.elo_to_rank(old_elo)}) (${elo_diff_str})`, true);
+            .addField('New Elo', `${new_elo} (${Elo.elo_to_rank(new_elo)}) (${elo_diff_str})`, true);
         if (Elo.elo_to_rank(old_elo) != Elo.elo_to_rank(new_elo)) {
             const description = elo_diff_value > 0 ? "You ranked up!" : "You downranked.";
             embed.setDescription(description);
