@@ -9,6 +9,7 @@ export default class Help extends PublicCommand {
     name: string = "help";
     short_description: string = "Help! It's a flying spaghetti monster!";
     long_description: string = "Help! It's a flying spaghetti monster! ARRRRRe you in danger? Get off my ship you whining land rat!";
+    readonly resource_path = "../../../resources/";
 
     private arg_parser: ArgumentParser;
     constructor() {
@@ -86,6 +87,10 @@ export default class Help extends PublicCommand {
             .setDescription(`Help page for \`${command.name}\``)
             .addField("Description", command.long_description, false)
             .addField("Usage", `\`\`\`${command.usage}\`\`\``, false);
+        // if the command has a linked resource, attach it
+        if (command.resource) {
+            helpEmbed.setImage(command.resource);
+        }
         return helpEmbed;
     }
 }

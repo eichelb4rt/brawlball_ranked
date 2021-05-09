@@ -8,6 +8,7 @@ export default class Link extends PublicCommand {
     name: string = "link";
     short_description: string = "Link your Brawlhalla account to queue in ranked matches.";
     long_description: string = "Link your Brawlhalla account to queue in ranked matches. You can find your Brawlhalla ID when you start up Brawlhalla and look into your inventory.";
+    resource: string | undefined = "https://i.imgur.com/Jb1zAhJ.png";
     
     private arg_parser: ArgumentParser;
     constructor() {
