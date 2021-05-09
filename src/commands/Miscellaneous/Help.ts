@@ -87,10 +87,15 @@ export default class Help extends PublicCommand {
             .setDescription(`Help page for \`${command.name}\``)
             .addField("Description", command.long_description, false)
             .addField("Usage", `\`\`\`${command.usage}\`\`\``, false);
+
         // if the command has a linked resource, attach it
         if (command.resource) {
             helpEmbed.setImage(command.resource);
         }
+
+        // if i ever wanna add a blank field for spacing
+        // { name: '\u200B', value: '\u200B' }
+
         return helpEmbed;
     }
 }
