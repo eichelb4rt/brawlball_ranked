@@ -12,7 +12,7 @@ export default class Link extends PublicCommand {
     name: string = "roles";
     short_description: string = "Set your Brawlball roles (run, defend, support).";
     long_description: string = `Set your Brawlball roles (run, defend, support). You've got ${this.time_unti_message_deleted}s time to set (react) your roles after the command has been sent. Alternatively, you can give your preferred roles a parameters to the command.`;
-    
+
     private arg_parser: ArgumentParser;
     constructor() {
         super();
@@ -116,7 +116,10 @@ export default class Link extends PublicCommand {
         }
 
         // role selection ended
-        msg.delete({reason: "Role selection ended."});
+        msg.delete({ reason: "Role selection ended." })
+            .catch(_ => {
+                // this is intentionally empty: if we can't delete the message, that's fine.
+            });
         return chosen_roles;
     }
 
