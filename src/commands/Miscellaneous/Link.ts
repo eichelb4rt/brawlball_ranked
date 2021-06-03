@@ -56,7 +56,7 @@ export default class Link extends PublicCommand {
 
         // check if the discord ujser already has a brawl account linked
         if (await db.get("SELECT * FROM Users WHERE DiscordID = ?", [msg.author.id])) {
-            db.run("UPDATE Users SET BrawlID = ? WHERE DiscordID = ?", [args.brawl_id, msg.author.id]);
+            db.run("UPDATE Users SET BrawlhallaID = ? WHERE DiscordID = ?", [args.brawl_id, msg.author.id]);
             msg.channel.send(`You successfully updated your Brawlhalla id, ${name}`);
         } else {
             db.run("INSERT INTO Users VALUES(?, ?)", [msg.author.id, args.brawl_id]);

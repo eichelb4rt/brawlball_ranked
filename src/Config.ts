@@ -60,7 +60,8 @@ export default class Config {
 		{ name: "Platinum 3", start: 1808 },
 		{ name: "Platinum 4", start: 1872 },
 		{ name: "Platinum 5", start: 1936 },
-		{ name: "Diamond", start: 2000 }
+		{ name: "Diamond", start: 2000 },
+		{ name: "Blood Diamond", start: 3000 }
 	];
 
 	////////////////////////////////////////////////////////////////
