@@ -12,9 +12,13 @@ import MappedMinHeap from "../datastructures/MappedMinHeap";
  * based on [Theoretical Foundations of Team Matchmaking](http://www.ifaamas.org/Proceedings/aamas2017/pdfs/p1073.pdf)
  */
 export default class MatchFinderPaperImpl implements MatchFinder {
-    // linked list of all the players and their possible matches
+    /**
+     * A linked list of all the players and their possible matches.
+     */
     private player_list: LinkedList<PlayerEntry> = new LinkedList();
-    // best game (Player[][]) where the index player (Player) is the worst
+    /**
+     * Holds the best games (Player[][]) where the index player (Player) is the worst.
+     */
     private best_games: MappedMinHeap<Player, Player[][]>;
     private readonly match_evaluator: MatchEvaluator;
     private readonly match_filter: MatchFilter;

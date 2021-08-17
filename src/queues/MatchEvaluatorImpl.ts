@@ -2,9 +2,24 @@ import Player from "../players/Player";
 import MatchEvaluator from "./MatchEvaluator";
 
 export default class MatchEvaluatorPaperImpl implements MatchEvaluator {
-    private readonly P: number; // p parameter for team matchmaking algorithm
-    private readonly Q: number; // q parameter for team matchmaking
-    private readonly ALPHA: number;  // alpha parameter for team matchmaking
+    /**
+     * p parameter for team matchmaking
+     * 
+     * see [Theoretical Foundations of Team Matchmaking](http://www.ifaamas.org/Proceedings/aamas2017/pdfs/p1073.pdf)
+     */
+    private readonly P: number;
+    /**
+     * q parameter for team matchmaking
+     * 
+     * see [Theoretical Foundations of Team Matchmaking](http://www.ifaamas.org/Proceedings/aamas2017/pdfs/p1073.pdf)
+     */
+    private readonly Q: number;
+    /**
+     * α parameter for team matchmaking
+     * 
+     * see [Theoretical Foundations of Team Matchmaking](http://www.ifaamas.org/Proceedings/aamas2017/pdfs/p1073.pdf)
+     */
+    private readonly ALPHA: number;
 
     constructor(P: number, Q: number, ALPHA: number) {
         this.P = P;
