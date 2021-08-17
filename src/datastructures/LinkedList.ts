@@ -197,13 +197,13 @@ export default class LinkedList<T> {
      * @yields The nodes along the walk.
      */
     private *walk_forward(from: LinkedListNode<T>, n: number): Generator<LinkedListNode<T>, void, void> {
-        let node: LinkedListNode<T> | undefined = from;
+        let node: LinkedListNode<T> = from;
         for (let i = 0; i < n; ++i) {
-            node = node.next;
-            if (node === undefined) {
+            yield node;
+            if (node.next === undefined) {
                 break;
             }
-            yield node;
+            node = node.next;
         }
     }
 
@@ -214,13 +214,13 @@ export default class LinkedList<T> {
      * @yields The nodes along the walk.
      */
     private *walk_backward(from: LinkedListNode<T>, n: number): Generator<LinkedListNode<T>, void, void> {
-        let node: LinkedListNode<T> | undefined = from;
+        let node: LinkedListNode<T> = from;
         for (let i = 0; i < n; ++i) {
-            node = node.prev;
-            if (node === undefined) {
+            yield node;
+            if (node.prev === undefined) {
                 break;
             }
-            yield node;
+            node = node.prev;
         }
     }
 
