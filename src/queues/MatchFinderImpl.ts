@@ -12,11 +12,12 @@ import MappedMinHeap from "../datastructures/MappedMinHeap";
  * based on [Theoretical Foundations of Team Matchmaking](http://www.ifaamas.org/Proceedings/aamas2017/pdfs/p1073.pdf)
  */
 export default class MatchFinderPaperImpl implements MatchFinder {
+    // linked list of all the players and their possible matches
     private player_list: LinkedList<PlayerEntry> = new LinkedList();
-    private match_evaluator: MatchEvaluator;
-    private match_filter: MatchFilter;
     // best game (Player[][]) where the index player (Player) is the worst
     private best_games: MappedMinHeap<Player, Player[][]>;
+    private readonly match_evaluator: MatchEvaluator;
+    private readonly match_filter: MatchFilter;
     private readonly config: MatchFinderPaperConfig;
     private readonly relevant_player_radius: number;
 
@@ -47,41 +48,44 @@ export default class MatchFinderPaperImpl implements MatchFinder {
             }
         }
 
+        // update
         this.update_hot_nodes(hot_nodes);
     }
 
     public remove(players: Player[]) {
-        // nodes that have been rremoved by this function
-        const removed_nodes: Set<LinkedListNode<PlayerEntry>> = new Set();
+        // figure out which nodes will be removed by this function
+        const nodes_to_remove: Set<LinkedListNode<PlayerEntry>> = new Set();
         // set so that checks of node removal are faster
-        const removed_players_set: Set<Player> = new Set(players);
+        const check_set: Set<Player> = new Set(players);
         for (const node of this.player_list.walk()) {
-            if (removed_players_set.has(node.value.player)) {
-                removed_nodes.add(node);
+            if (check_set.has(node.value.player)) {
+                nodes_to_remove.add(node);
                 // to see if the set is empty after
-                removed_players_set.delete(node.value.player);
+                check_set.delete(node.value.player);
             }
         }
         // if "removed_players_set" is not empty by now, someone was not in the queue
-        if (removed_players_set.size !== 0) {
+        if (check_set.size !== 0) {
             throw RangeError("At least 1 player in this group is not in the queue.");
         }
 
-        // nodes that need to be updated
+        // find nodes that need to be updated
         const hot_nodes: Set<LinkedListNode<PlayerEntry>> = new Set();
-        for (const removed_node of removed_nodes) {
+        for (const removed_node of nodes_to_remove) {
             for (const hot_node of this.player_list.walk(removed_node, -this.relevant_player_radius)) {
                 hot_nodes.add(hot_node);
             }
         }
-
-        // now finally remove the stuff
-        for (const removed_node of removed_nodes) {
-            // we don't need to update the removed nodes
+        // we don't need to update the removed nodes
+        for (const removed_node of nodes_to_remove) {
             hot_nodes.delete(removed_node);
-            // remove all the nodes from the list
+        }
+
+        // now finally remove the players from the player list
+        for (const removed_node of nodes_to_remove) {
             this.player_list.remove(removed_node);
         }
+
         // also remove the players from the best matches heap
         for (const player of players) {
             try {
@@ -91,6 +95,7 @@ export default class MatchFinderPaperImpl implements MatchFinder {
             }
         }
 
+        // update
         this.update_hot_nodes(hot_nodes);
     }
 
@@ -111,7 +116,7 @@ export default class MatchFinderPaperImpl implements MatchFinder {
     }
 
     /**
-     * Finds the spot that a new player will be inserted in and inserts the üöayer.
+     * Finds the spot that a new player will be inserted in and inserts the Player.
      * @param player The player that will be inserted.
      * @returns The newly created node with the player.
      */
@@ -126,6 +131,10 @@ export default class MatchFinderPaperImpl implements MatchFinder {
         return this.player_list.add(entry);
     }
 
+    /**
+     * Updates the possible matches and the best match for the hot nodes.
+     * @param hot_nodes all the nodes that need to be updated.
+     */
     private update_hot_nodes(hot_nodes: Set<LinkedListNode<PlayerEntry>>) {
         for (const hot_node of hot_nodes) {
             this.update_possible_matches(hot_node);
@@ -171,6 +180,13 @@ export default class MatchFinderPaperImpl implements MatchFinder {
         }
     }
 
+    /**
+     * Chooses n players from [from,end).
+     * @param n The number of players in the selection.
+     * @param from First node included in the selection.
+     * @param end First node excluded from the selection.
+     * @yields Every possible selection of n players from [from, end).
+     */
     private *choose_players(n: number, from: LinkedListNode<PlayerEntry> | undefined, end: LinkedListNode<PlayerEntry> | undefined = undefined): Generator<Player[], void, void> {
         if (n === 0) yield [];
         if (from === undefined) return;
@@ -183,6 +199,25 @@ export default class MatchFinderPaperImpl implements MatchFinder {
     }
 }
 
+/**
+ * Chooses n objects from a given array.
+ * @param n The number of selected objects.
+ * @param arr The array that the objects are chosen from.
+ * @param from Only elements after this index (inclusive) are considered.
+ * @yields Every possible selection of n players in the array.
+ */
+function* choose<T>(n: number, arr: T[], from: number = 0): Generator<T[], void, void> {
+    if (n === 0) yield [];
+    for (let i = from; i < arr.length; ++i) {
+        for (const rest of choose(n - 1, arr, i + 1)) {
+            yield rest.concat([arr[i]]);
+        }
+    }
+}
+
+/**
+ * Entries of the player list in the match finding datastructure above.
+ */
 class PlayerEntry {
     public readonly player: Player;
     private readonly match_evaluator: MatchEvaluator;
@@ -197,15 +232,6 @@ class PlayerEntry {
 
     public empty_heap() {
         this.possible_games = new MinHeap(this.match_evaluator.heap_order.bind(this.match_evaluator));
-    }
-}
-
-function* choose<T>(n: number, arr: T[], from: number = 0): Generator<T[], void, void> {
-    if (n === 0) yield [];
-    for (let i = from; i < arr.length; ++i) {
-        for (const rest of choose(n - 1, arr, i + 1)) {
-            yield rest.concat([arr[i]]);
-        }
     }
 }
 

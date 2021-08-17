@@ -173,7 +173,7 @@ export default class LinkedList<T> {
      * Walks n nodes from "from".
      * @param from The node the walk starts from.
      * @param n The amount of walked nodes.
-     * @yields The nodes along the walk.
+     * @yields The nodes along the walk [from,from + n].
      */
     public *walk(from: LinkedListNode<T> | undefined = this.head, n: number = Number.MAX_VALUE): Generator<LinkedListNode<T>, void, void> {
         if (from === undefined) {
@@ -194,7 +194,7 @@ export default class LinkedList<T> {
      * Walks n nodes forwards from "from".
      * @param from The node the walk starts from.
      * @param n The amount of walked nodes.
-     * @yields The nodes along the walk.
+     * @yields The nodes along the walk [from,from + n].
      */
     private *walk_forward(from: LinkedListNode<T>, n: number): Generator<LinkedListNode<T>, void, void> {
         let node: LinkedListNode<T> = from;
@@ -211,7 +211,7 @@ export default class LinkedList<T> {
      * Walks n nodes backwards from "from".
      * @param from The node the walk starts from.
      * @param n The amount of walked nodes.
-     * @yields The nodes along the walk.
+     * @yields The nodes along the walk [from,from - n].
      */
     private *walk_backward(from: LinkedListNode<T>, n: number): Generator<LinkedListNode<T>, void, void> {
         let node: LinkedListNode<T> = from;
