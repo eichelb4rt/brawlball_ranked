@@ -2,6 +2,8 @@ import MinHeap from "./MinHeap";
 
 /**
  * MinHeap that keeps track of objects indices inside the datastructure.
+ * 
+ * Objects must be unique.
  */
 export default class FastAccessMinHeap<T> extends MinHeap<T> {
     private indices: Map<T, number> = new Map();
@@ -13,6 +15,12 @@ export default class FastAccessMinHeap<T> extends MinHeap<T> {
     override insert(value: T) {
         this.indices.set(value, this.heapsize);
         super.insert(value);
+    }
+
+    override change_value(i: number, value: T) {
+        this.indices.delete(this.arr[i]);
+        this.indices.set(value, i);
+        super.change_value(i, value);
     }
 
     override delete(i: number) {

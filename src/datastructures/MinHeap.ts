@@ -72,26 +72,20 @@ export default class MinHeap<T> {
     }
 
     public change_value(i: number, value: T) {
-        if (this.gt(value, this.arr[i])) this.increase_value(i, value);
-        else if (this.lt(value, this.arr[i])) this.decrease_value(i, value);
+        const old_value = this.arr[i];
+        this.arr[i] = value;
+        if (this.gt(value, old_value)) this.increase_value_cleanup(i, value);
+        else if (this.lt(value, old_value)) this.decrease_value_cleanup(i, value);
     }
 
-    protected decrease_value(i: number, value: T) {
-        if (this.gt(value, this.arr[i])) {
-            throw new Error(`Cannot decrease value ${this.arr[i]} to ${value}.`);
-        }
-        this.arr[i] = value;
+    protected decrease_value_cleanup(i: number, value: T) {
         while (i > 1 && this.gt(this.arr[this.father(i)], this.arr[i])) {   // while under root and A[father(i)] > A[i]
             this.switch(this.father(i), i);
             i = this.father(i);
         }
     }
 
-    protected increase_value(i: number, value: T) {
-        if (this.lt(value, this.arr[i])) {
-            throw new Error(`Cannot increase value ${this.arr[i]} to ${value}.`);
-        }
-        this.arr[i] = value;
+    protected increase_value_cleanup(i: number, value: T) {
         this.heapify(i);
     }
 

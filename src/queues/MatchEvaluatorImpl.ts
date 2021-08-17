@@ -12,14 +12,14 @@ export default class MatchEvaluatorPaperImpl implements MatchEvaluator {
         this.ALPHA = ALPHA;
     }
 
-    quality(match: Player[][] | undefined): number {
+    quality(match: Player[][]): number {
         if (match === undefined) {
             return Number.NEGATIVE_INFINITY;
         }
         return -this.imbalance_function(match);
     }
 
-    heap_order(match_1: Player[][] | undefined, match_2: Player[][] | undefined): number {
+    heap_order(match_1: Player[][], match_2: Player[][]): number {
         let score_1 = this.quality(match_1);
         let score_2 = this.quality(match_2);
         if (score_1 > score_2) return -1;

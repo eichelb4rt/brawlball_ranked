@@ -9,7 +9,7 @@ export default interface MatchEvaluator {
      * @param match Match to be evaluated.
      * @returns Match quality. Higher values mean higher quality.
      */
-    quality(match: Player[][] | undefined): number;
+    quality(match: Player[][]): number;
 
     /**
      * Function for ordering matches in the heap.
@@ -17,5 +17,5 @@ export default interface MatchEvaluator {
      * @param match_2 A match.
      * @returns -1: q(1) > q(2), 0: q(1) == q(2), 1: q(1) < q(2)
      */
-    heap_order(match_1: Player[][] | undefined, match_2: Player[][] | undefined): number;
+    heap_order(match_1: Player[][], match_2: Player[][]): number;
 }

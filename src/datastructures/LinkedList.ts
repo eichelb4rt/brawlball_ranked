@@ -9,6 +9,11 @@ export interface LinkedListNode<T> {
 export default class LinkedList<T> {
     public head: LinkedListNode<T> | undefined;
     public tail: LinkedListNode<T> | undefined;
+    private _size: number = 0;
+
+    public get size(): number {
+        return this._size;
+    }
 
     /**
      * Adds a new node to the back of the list.
@@ -16,6 +21,7 @@ export default class LinkedList<T> {
      * @returns the newly created node.
      */
     public add(value: T): LinkedListNode<T> {
+        ++this._size;
         let new_node: LinkedListNode<T> = { value: value, next: undefined };
         if (this.is_empty()) {
             this.head = this.tail = new_node;
@@ -33,6 +39,7 @@ export default class LinkedList<T> {
      * @returns the newly created node.
      */
     public add_front(value: T): LinkedListNode<T> {
+        ++this._size;
         let new_node: LinkedListNode<T> = { value: value, prev: undefined };
         if (this.is_empty()) {
             this.head = this.tail = new_node;
@@ -49,6 +56,7 @@ export default class LinkedList<T> {
      * @param node The node that will be removed.
      */
     public remove(node: LinkedListNode<T>) {
+        --this._size;
         let prev_node = node.prev;
         let next_node = node.next;
         if (node === this.head && node === this.tail) {
@@ -102,6 +110,7 @@ export default class LinkedList<T> {
         if (prev_node.next !== next_node || next_node.prev !== prev_node) {
             throw RangeError("Nodes must be adjacent");
         }
+        ++this._size;
         let new_node: LinkedListNode<T> = { value: value, prev: prev_node, next: next_node };
         prev_node.next = new_node;
         next_node.prev = new_node;
@@ -112,33 +121,27 @@ export default class LinkedList<T> {
         return this.head === undefined;
     }
 
-    public *get_nodes(from: LinkedListNode<T> | undefined = this.head, end: LinkedListNode<T> | undefined = undefined): Generator<LinkedListNode<T>, void, void> {
-        for (let node = from; node !== end; node = node!.next) {
-            yield node!;
-        }
-    }
-
     /**
-     * Walks n nodes from "from".
+     * Jumps n nodes from "from".
      * @param from The node the walk starts from.
      * @param n The amount of walked nodes.
      * @returns The destination of the walk.
      */
-    public scroll(from: LinkedListNode<T>, n: number): LinkedListNode<T> | undefined {
+    public jump(from: LinkedListNode<T>, n: number): LinkedListNode<T> | undefined {
         if (n >= 0) {
-            return this.scroll_forward(from, n);
+            return this.jump_forward(from, n);
         } else {
-            return this.scroll_backward(from, -n);
+            return this.jump_backward(from, -n);
         }
     }
 
     /**
-     * Walks n nodes forwards from "from".
+     * Jumps n nodes forwards from "from".
      * @param from The node the walk starts from.
      * @param n The amount of walked nodes.
      * @returns The destination of the walk.
      */
-    private scroll_forward(from: LinkedListNode<T>, n: number): LinkedListNode<T> | undefined {
+    private jump_forward(from: LinkedListNode<T>, n: number): LinkedListNode<T> | undefined {
         let node: LinkedListNode<T> | undefined = from;
         for (let i = 0; i < n; ++i) {
             if (node === undefined) {
@@ -150,12 +153,12 @@ export default class LinkedList<T> {
     }
 
     /**
-     * Walks n nodes backwards from "from".
+     * Jumps n nodes backwards from "from".
      * @param from The node the walk starts from.
      * @param n The amount of walked nodes.
      * @returns The destination of the walk.
      */
-    private scroll_backward(from: LinkedListNode<T>, n: number): LinkedListNode<T> | undefined {
+    private jump_backward(from: LinkedListNode<T>, n: number): LinkedListNode<T> | undefined {
         let node: LinkedListNode<T> | undefined = from;
         for (let i = 0; i < n; ++i) {
             if (node === undefined) {
@@ -167,15 +170,78 @@ export default class LinkedList<T> {
     }
 
     /**
+     * Walks n nodes from "from".
+     * @param from The node the walk starts from.
+     * @param n The amount of walked nodes.
+     * @yields The nodes along the walk.
+     */
+    public *walk(from: LinkedListNode<T> | undefined = this.head, n: number = Number.MAX_VALUE): Generator<LinkedListNode<T>, void, void> {
+        if (from === undefined) {
+            return;
+        }
+        if (n >= 0) {
+            for (const node of this.walk_forward(from, n)) {
+                yield node;
+            }
+        } else {
+            for (const node of this.walk_backward(from, -n)) {
+                yield node;
+            }
+        }
+    }
+
+    /**
+     * Walks n nodes forwards from "from".
+     * @param from The node the walk starts from.
+     * @param n The amount of walked nodes.
+     * @yields The nodes along the walk.
+     */
+    private *walk_forward(from: LinkedListNode<T>, n: number): Generator<LinkedListNode<T>, void, void> {
+        let node: LinkedListNode<T> | undefined = from;
+        for (let i = 0; i < n; ++i) {
+            node = node.next;
+            if (node === undefined) {
+                break;
+            }
+            yield node;
+        }
+    }
+
+    /**
      * Walks n nodes backwards from "from".
      * @param from The node the walk starts from.
      * @param n The amount of walked nodes.
-     * @returns The destination of the walk.
+     * @yields The nodes along the walk.
      */
-    public *walk_backward(from: LinkedListNode<T>, n: number): Generator<LinkedListNode<T>, void, void> {
+    private *walk_backward(from: LinkedListNode<T>, n: number): Generator<LinkedListNode<T>, void, void> {
         let node: LinkedListNode<T> | undefined = from;
         for (let i = 0; i < n; ++i) {
             node = node.prev;
+            if (node === undefined) {
+                break;
+            }
+            yield node;
+        }
+    }
+
+    public to_array(): T[] {
+        let arr: T[] = new Array<T>(this.size);
+        let index = 0;
+        for (const node of this.walk()) {
+            arr[index++] = node.value;
+        }
+        return arr;
+    }
+
+    /**
+     * Walks forwards from "from" until it reached end.
+     * @param from The node the walk starts from.
+     * @param end The node the walk ends at.
+     * @yields The nodes along the walk [from,end).
+     */
+    public *nodes_between(start: LinkedListNode<T>, end: LinkedListNode<T> | undefined): Generator<LinkedListNode<T>, void, void> {
+        let node: LinkedListNode<T> | undefined;
+        for (node = start; node !== end; node = node.next) {
             if (node === undefined) {
                 break;
             }

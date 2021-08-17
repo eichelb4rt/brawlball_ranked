@@ -55,6 +55,7 @@ export default class MappedMinHeap<T, K> {
         const old_value = this.map.get(index)!;
         const heap_index = this.heap.get_index(old_value)!;
         this.heap.delete(heap_index);
+        this.map.delete(index);
         this.reverse_map.delete(old_value);
     }
 
@@ -68,5 +69,9 @@ export default class MappedMinHeap<T, K> {
 
     public get root(): K | undefined {
         return this.heap.root;
+    }
+
+    public has_index(index: T): boolean {
+        return this.map.has(index);
     }
 }
