@@ -74,11 +74,11 @@ export default class QueueManager {
         
         for (let player of team.players) {
             if (player.queue) { // if a player is already in a queue, we can't add the team
-                let mention = `<@${await player.getDiscordID()}>`;
+                let mention = `<@${player.discord_id}>`;
                 throw new Error(`${mention} is already in a queue.`);
             }
             if (player.match) { // if a player is already in a match, we can't add the team
-                let name = `<@${await player.getDiscordID()}>`;
+                let name = `<@${player.discord_id}>`;
                 throw new Error(`${name} is already in a match.`);
             }
         }

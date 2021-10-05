@@ -75,7 +75,7 @@ export default class Info extends PublicCommand {
         let has_rank: boolean = false;  // determine if the player is actually ranked in anywhere
         const pools = player.elo_map.keys();
         for (let blueprint of pools) {
-            const elo = player.getEloInQueue(blueprint);
+            const elo = player.get_specific_elo(blueprint);
             const rank = player.getRank(blueprint);
             if (elo != Config.eloOnStart) {
                 has_rank = true;
